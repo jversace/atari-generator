@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Atari Generator</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <div id="viewport">
+      <div id="fovOverlay">
+        <label for="fovRange">Focale</label>
+        <input type="range" id="fovRange" min="20" max="90" step="1" value="45" />
+        <span id="fovValue">45°</span>
+      </div>
+    </div>
+
+    <aside id="panel">
+      <div id="modeBar">
+        <button id="btnEditMode" class="mode active">Édition des cotes</button>
+        <button id="btnPoseMode" class="mode">Mode posture</button>
+        <button id="btnSpineMode" class="mode">Colonne (Bézier)</button>
+      </div>
+
+      <div id="poseHint" class="hint" hidden>
+        Clique gauche sur une articulation / un volume puis glisse pour la
+        déplacer ou la faire pivoter (bascule <b>T</b> = translater,
+        <b>R</b> = pivoter). Les éléments accrochés en aval suivent.
+      </div>
+      <div id="spineHint" class="hint" hidden>
+        Déplace les deux poignées (sphères oranges) pour régler les deux
+        courbures de la colonne.
+      </div>
+
+      <div id="controls"></div>
+
+      <div id="fileBar">
+        <button id="btnSave">💾 Enregistrer le projet</button>
+        <button id="btnLoad">📂 Charger un projet</button>
+        <button id="btnExport">🖼️ Exporter en PNG</button>
+        <button id="btnReset">↺ Réinitialiser</button>
+      </div>
+    </aside>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./node_modules/three/build/three.module.js",
+      "three/addons/": "./node_modules/three/examples/jsm/",
+      "three/examples/jsm/": "./node_modules/three/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="./src/main-renderer.js"></script>
+</body>
+</html>

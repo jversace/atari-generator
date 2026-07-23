@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>À propos</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #1e1e1e; color: #e8e8e8;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #about {
+    text-align: center;
+    padding: 24px;
+  }
+  #about img {
+    width: 96px; height: 96px; margin-bottom: 12px;
+    border-radius: 20px;
+  }
+  #about h1 {
+    font-size: 18px; margin: 0 0 4px;
+  }
+  #about .version {
+    font-size: 12px; color: #9ab; margin-bottom: 16px;
+  }
+  #about .field {
+    font-size: 13px; color: #ccc; margin: 4px 0;
+  }
+  #about a {
+    color: #6fb3ff; text-decoration: none;
+  }
+  #about a:hover { text-decoration: underline; }
+
+  /* ------------------------------------------------------------------
+     Section libre : ajoute ici tout ce que tu veux (remerciements,
+     bibliothèques utilisées, notes de version, logo alternatif...).
+     Le nom, la version, l'auteur et le lien GitHub au-dessus se
+     remplissent tout seuls depuis package.json (voir <script> en bas) —
+     tu n'as pas besoin d'y toucher pour ça.
+     ------------------------------------------------------------------ */
+  #extra {
+    margin-top: 18px; padding-top: 14px;
+    border-top: 1px solid #3a3a3a;
+    font-size: 12px; color: #999;
+  }
+</style>
+</head>
+<body>
+  <div id="about">
+    <img src="build/icon.png" alt="Icône de l'application" />
+    <h1 id="appName">—</h1>
+    <div class="version" id="appVersion">—</div>
+
+    <div class="field">Auteur : <span id="appAuthor">—</span></div>
+    <div class="field">Licence : <span id="appLicense">—</span></div>
+    <div class="field"><a id="appHomepage" href="#" target="_blank">Voir le dépôt GitHub</a></div>
+
+    <div id="extra">
+      <!-- Ajoute ici ce que tu veux (remerciements, crédits, etc.) -->
+    </div>
+  </div>
+
+  <script>
+    window.aboutAPI.getInfo().then((info) => {
+      document.getElementById('appName').textContent = info.name;
+      document.getElementById('appVersion').textContent = `Version ${info.version}`;
+      document.getElementById('appAuthor').textContent = info.author || '—';
+      document.getElementById('appLicense').textContent = info.license || '—';
+      const link = document.getElementById('appHomepage');
+      if (info.homepage) {
+        link.href = info.homepage;
+      } else {
+        link.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

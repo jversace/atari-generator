@@ -1,0 +1,65 @@
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; height: 100%; width: 100%;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #2b2b2b; color: #e8e8e8;
+  overflow: hidden;
+}
+#app { display: flex; height: 100%; width: 100%; }
+#viewport { flex: 1; position: relative; }
+#viewport canvas { display: block; }
+
+#fovOverlay {
+  position: absolute; bottom: 14px; left: 14px; z-index: 10;
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(30, 30, 30, 0.75); border: 1px solid #4a4a4a;
+  border-radius: 6px; padding: 8px 12px; font-size: 12px; color: #ddd;
+}
+#fovOverlay input[type="range"] { width: 140px; }
+#fovValue { min-width: 2.5em; text-align: right; }
+
+#panel {
+  width: 320px;
+  background: #1e1e1e;
+  border-left: 1px solid #3a3a3a;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  overflow-y: auto;
+}
+
+#modeBar { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+button.mode {
+  background: #333; color: #ddd; border: 1px solid #4a4a4a;
+  padding: 8px; border-radius: 4px; cursor: pointer; font-size: 13px;
+}
+button.mode.active { background: #3a6ea5; border-color: #4f8fd6; color: #fff; }
+
+.hint {
+  font-size: 12px; background: #33301f; border: 1px solid #55501f;
+  padding: 8px; border-radius: 4px; margin-bottom: 10px; line-height: 1.4;
+}
+
+#controls { flex: 1; }
+
+.group-title {
+  font-size: 12px; text-transform: uppercase; letter-spacing: .05em;
+  color: #9ab; margin: 14px 0 6px; border-bottom: 1px solid #3a3a3a; padding-bottom: 4px;
+}
+.control-row {
+  display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px;
+}
+.control-row label {
+  display: flex; justify-content: space-between; font-size: 12px; color: #ccc;
+}
+.control-row input[type="range"] { width: 100%; }
+
+#fileBar {
+  display: flex; flex-wrap: wrap; gap: 6px; padding-top: 10px;
+  border-top: 1px solid #3a3a3a;
+}
+#fileBar button {
+  flex: 1 1 45%; background: #2f2f2f; color: #eee; border: 1px solid #4a4a4a;
+  padding: 8px 4px; border-radius: 4px; cursor: pointer; font-size: 12px;
+}
+#fileBar button:hover, button.mode:hover { filter: brightness(1.2); }
