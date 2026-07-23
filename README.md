@@ -16,7 +16,20 @@ npm install
 ```
 
 Cela télécharge Three.js, Electron et electron-builder (peut prendre quelques
-minutes la première fois, Electron pèse ~150 Mo).
+minutes la première fois, Electron pèse ~150 Mo). `npm install` copie aussi
+automatiquement 3 fichiers de Three.js dans `vendor/` (voir encadré
+ci-dessous) — si jamais ça n'arrive pas tout seul, relance-le à la main avec
+`npm run vendor`.
+
+> **Pourquoi un dossier `vendor/` ?** electron-builder exclut par défaut,
+> dans toutes les dépendances de `node_modules`, tout sous-dossier nommé
+> `examples` (pour ne pas embarquer les démos/tests de chaque librairie).
+> C'est justement là que vivent `OrbitControls.js` et
+> `TransformControls.js` dans Three.js — ils étaient donc invisibles à
+> l'exécutable final (`npm run dist`) alors que `npm start` fonctionnait
+> très bien (il lit `node_modules` directement, sans cette règle
+> d'exclusion). En les copiant dans `vendor/`, un dossier normal du
+> projet, ils sont embarqués comme n'importe quel autre fichier.
 
 ## 3. Lancer l'application en développement
 

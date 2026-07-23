@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "description": "Générateur d'atari (mannequin filaire paramétrable) pour dessinateurs",
   "author": "Julien Versace",
-  "license": "LGPL-3.0-or-later",
-  "homepage": "https://github.com/TON-COMPTE/TON-DEPOT",
+  "license": "LGPL-3.0",
+  "homepage": "https://github.com/jversace/atari-generator",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "postinstall": "node scripts/copy-vendor.js",
+    "vendor": "node scripts/copy-vendor.js",
     "dist": "electron-builder --win"
   },
   "dependencies": {
@@ -32,8 +34,8 @@
       "index.html",
       "style.css",
       "src/**/*",
-      "build/icon.png",
-      "node_modules/**/*"
+      "vendor/**/*",
+      "build/icon.png"
     ]
   }
 }
