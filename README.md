@@ -78,8 +78,7 @@ télécharge les binaires Electron nécessaires lors de la première exécution
   de modifier `main.js` pour ça.
 - `about.html` — le contenu de la fenêtre "À propos" (menu Aide). Le nom,
   la version, l'auteur, la licence et le lien GitHub s'y remplissent tout
-  seuls (lus depuis `package.json`) ; ajoute ce que tu veux dans la
-  section `#extra` en bas du fichier.
+  seuls (lus depuis `package.json`) ; 
 - `build/icon.ico` / `build/icon.png` — icône de l'application (voir
   section suivante pour la remplacer).
 
