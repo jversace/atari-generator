@@ -73,7 +73,7 @@ télécharge les binaires Electron nécessaires lors de la première exécution
   orientation par défaut, etc.)
 - `src/main-renderer.js` — scène 3D, panneau, sélection, export, fichiers.
 - `package.json` — nom, **version**, auteur, licence et lien `homepage`
-  (à remplacer par l'URL de ton dépôt GitHub) : tout ça alimente
+  : tout ça alimente
   automatiquement la barre de titre et la fenêtre "À propos", pas besoin
   de modifier `main.js` pour ça.
 - `about.html` — le contenu de la fenêtre "À propos" (menu Aide). Le nom,
