@@ -18,10 +18,10 @@ npm install
 Cela télécharge Three.js, Electron et electron-builder (peut prendre quelques
 minutes la première fois, Electron pèse ~150 Mo). `npm install` copie aussi
 automatiquement 3 fichiers de Three.js dans `vendor/` (voir encadré
-ci-dessous) — si jamais ça n'arrive pas tout seul, relance-le à la main avec
+ci-dessous) — si jamais ça n'arrive pas tout seul, relancer à la main avec
 `npm run vendor`.
 
-> **Pourquoi un dossier `vendor/` ?** electron-builder exclut par défaut,
+> **Le dossier `vendor/` ?** electron-builder exclut par défaut,
 > dans toutes les dépendances de `node_modules`, tout sous-dossier nommé
 > `examples` (pour ne pas embarquer les démos/tests de chaque librairie).
 > C'est justement là que vivent `OrbitControls.js` et
@@ -44,7 +44,7 @@ le panneau de contrôle à droite.
   molette = zoomer, clic droit + glisser = déplacer la caméra (pan) —
   comportement standard d'`OrbitControls`.
 - **Édition des cotes** : les sliders modifient le mannequin en temps réel.
-- **Mode posture** : clique sur une articulation/un volume puis glisse pour
+- **Mode posture** : cliquer sur une articulation/un volume puis glisser pour
   la faire pivoter (ou `T` pour translater le bassin/thorax, `R` pour
   repasser en rotation).
 - **Colonne (Bézier)** : fait apparaître 2 poignées oranges à glisser pour
@@ -89,7 +89,7 @@ télécharge les binaires Electron nécessaires lors de la première exécution
 - Une icône de substitution est déjà en place (le mannequin filaire) —
   remplace-la simplement par la tienne, rien d'autre à modifier.
 - `build/icon.png` (256×256) est utilisé séparément par la fenêtre
-  "À propos" ; pense à le remplacer aussi si tu changes l'icône.
+  "À propos" ; penser à le remplacer aussi si changement d'icône.
 
 ## 6. Limites connues de ce prototype (pistes d'amélioration)
 
