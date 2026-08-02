@@ -27,6 +27,16 @@ function resize() {
 window.addEventListener('resize', resize);
 
 // ------------------------------------------------------------------
+// Options d'export (menu Fichier > Options d'export), persistées côté
+// main.js — on récupère l'état initial puis on écoute les changements
+// (la case peut être cochée/décochée à tout moment pendant que l'appli
+// tourne).
+// ------------------------------------------------------------------
+let exportOptions = { constructionMode: false, includeGrid: false };
+window.api.getExportOptions().then((opts) => { if (opts) exportOptions = opts; });
+window.api.onExportOptionsChanged((opts) => { exportOptions = opts; });
+
+// ------------------------------------------------------------------
 // Focale (FOV) — potentiomètre en surimpression sur le viewport
 // ------------------------------------------------------------------
 const fovRange = document.getElementById('fovRange');
@@ -247,8 +257,14 @@ transformControls.addEventListener('objectChange', () => {
     // reconstruction complète), voir buildMannequin() / spineControl.
     setPath(params, selectedEntry.paramPath, selectedEntry.object.position.z);
     const { curve, spineTube, pelvis, thorax, hasPelvisOverride, hasThoraxOverride } = mannequin.spineControl;
+    const newTubeGeo = new THREE.TubeGeometry(curve, 20, 1.1, 6, false);
     spineTube.geometry.dispose();
-    spineTube.geometry = new THREE.TubeGeometry(curve, 20, 1.1, 6, false);
+    spineTube.geometry = newTubeGeo;
+    const tubeEdges = spineTube.children.find(c => c.isLineSegments);
+    if (tubeEdges) {
+      tubeEdges.geometry.dispose();
+      tubeEdges.geometry = new THREE.EdgesGeometry(newTubeGeo, 15);
+    }
     if (!hasPelvisOverride) {
       pelvis.quaternion.copy(tiltQuaternionFromCurve(curve, 0, 0.4));
     }
@@ -308,17 +324,45 @@ btnSpine.addEventListener('click', () => setMode('spine'));
 // ------------------------------------------------------------------
 async function doExportPNG() {
   const prevBg = scene.background;
+  const prevGridVisible = grid.visible;
   const prevVisible = mannequin.spineHandles.map(h => h.object.visible);
   setSpineHandlesVisible(false);
   scene.background = new THREE.Color(0xffffff);
-  grid.visible = false;
+  grid.visible = exportOptions.includeGrid;
   transformControls.detach();
+
+  // Mode traits de construction : tout reste affiché (têtes, volumes,
+  // articulations, membres), mais le REMPLISSAGE de chaque forme pleine
+  // devient transparent — ne restent visibles que les contours/arêtes
+  // noirs, et ce qu'il y a derrière (ex. la colonne à travers le thorax).
+  // depthWrite:false est essentiel : sans ça, un remplissage invisible
+  // masquerait quand même ce qui est derrière lui dans le tampon de
+  // profondeur (transparent ≠ invisible pour le depth-buffer par défaut).
+  const restoreMaterials = [];
+  if (exportOptions.constructionMode) {
+    mannequin.root.traverse((obj) => {
+      if (obj.isMesh && obj.userData.isSolid) {
+        const mat = obj.material;
+        restoreMaterials.push({ mat, transparent: mat.transparent, opacity: mat.opacity, depthWrite: mat.depthWrite });
+        mat.transparent = true;
+        mat.opacity = 0;
+        mat.depthWrite = false;
+        mat.needsUpdate = true;
+      }
+    });
+  }
 
   renderer.render(scene, camera);
   const dataUrl = renderer.domElement.toDataURL('image/png');
 
   scene.background = prevBg;
-  grid.visible = true;
+  grid.visible = prevGridVisible;
+  restoreMaterials.forEach(({ mat, transparent, opacity, depthWrite }) => {
+    mat.transparent = transparent;
+    mat.opacity = opacity;
+    mat.depthWrite = depthWrite;
+    mat.needsUpdate = true;
+  });
   mannequin.spineHandles.forEach((h, i) => { h.object.visible = prevVisible[i]; });
 
   await window.api.exportPNG(dataUrl);

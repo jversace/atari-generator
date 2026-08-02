@@ -17,7 +17,7 @@
 import * as THREE from 'three';
 import {
   createFrustumBox, createEllipsoid, createLimbSegment,
-  createJointSphere, createFlatBlock, createHandle
+  createJointSphere, createFlatBlock, createHandle, createEdgeOverlay, createCylinderContour
 } from './geometry.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
@@ -192,10 +192,10 @@ export function buildMannequin(params) {
   spineGroup.position.set(0, pelvisTopY, pelvisBackOffset);
   pelvis.add(spineGroup);
 
-  const spineTube = new THREE.Mesh(
-    new THREE.TubeGeometry(curve, 20, 1.1, 6, false),
-    new THREE.MeshBasicMaterial({ color: 0x111111 })
-  );
+  const spineTubeGeo = new THREE.TubeGeometry(curve, 20, 1.1, 6, false);
+  const spineTube = new THREE.Mesh(spineTubeGeo, new THREE.MeshBasicMaterial({ color: 0x111111 }));
+  spineTube.userData.isSolid = true;
+  spineTube.add(createEdgeOverlay(spineTubeGeo, 0x000000, 15));
   spineGroup.add(spineTube, handle1, handle2);
   const spineHandles = [
     { id: 'spineCurve1', label: 'Courbure basse (lombaire)', object: handle1, paramPath: 'spine.curve1' },
@@ -230,12 +230,14 @@ export function buildMannequin(params) {
   // Portion "thoracique" de la colonne : rigide (le thorax est un bloc
   // fixe), donc un simple cylindre droit suffit — pas besoin d'une
   // courbure indépendante ici. Il continue jusqu'au cou.
-  const thoracicSpine = new THREE.Mesh(
-    new THREE.CylinderGeometry(1.1, 1.1, p.thorax.height, 8),
-    new THREE.MeshBasicMaterial({ color: 0x111111 })
-  );
+  const thoracicSpineGeo = new THREE.CylinderGeometry(1.1, 1.1, p.thorax.height, 12);
+  const thoracicSpine = new THREE.Mesh(thoracicSpineGeo, new THREE.MeshBasicMaterial({ color: 0x111111 }));
+  thoracicSpine.userData.isSolid = true;
   thoracicSpine.position.y = p.thorax.height / 2;
   thorax.add(thoracicSpine);
+  // Contour ajouté au thorax (pas au mesh recentré ci-dessus) : il utilise
+  // directement le repère y=0..hauteur, sans double décalage à gérer.
+  thorax.add(createCylinderContour(1.1, p.thorax.height, 0x000000, 2, 24));
 
   // --- Cou + tête --------------------------------------------------------
   const neck = new THREE.Group();

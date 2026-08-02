@@ -34,6 +34,10 @@ function saveConfig(config) {
 }
 
 let config = loadConfig();
+config.exportOptions = Object.assign(
+  { constructionMode: false, includeGrid: false },
+  config.exportOptions || {}
+);
 
 function rememberDir(filePath) {
   config.lastDir = path.dirname(filePath);
@@ -83,10 +87,18 @@ ipcMain.handle('get-about-info', () => ({
   homepage: pkg.homepage
 }));
 
+ipcMain.handle('get-export-options', () => config.exportOptions);
+
 // --- Menu ------------------------------------------------------------
 function buildMenu() {
   const sendAction = (action) => () => {
     if (mainWindow) mainWindow.webContents.send('menu-action', action);
+  };
+
+  const toggleExportOption = (key) => (menuItem) => {
+    config.exportOptions[key] = menuItem.checked;
+    saveConfig(config);
+    if (mainWindow) mainWindow.webContents.send('export-options-changed', config.exportOptions);
   };
 
   const template = [
@@ -94,6 +106,23 @@ function buildMenu() {
       label: 'Fichier',
       submenu: [
         { label: 'Exporter en PNG…', click: sendAction('export-png') },
+        {
+          label: 'Options d\'export',
+          submenu: [
+            {
+              label: 'Mode traits de construction',
+              type: 'checkbox',
+              checked: config.exportOptions.constructionMode,
+              click: toggleExportOption('constructionMode')
+            },
+            {
+              label: 'Inclure le plan',
+              type: 'checkbox',
+              checked: config.exportOptions.includeGrid,
+              click: toggleExportOption('includeGrid')
+            }
+          ]
+        },
         { label: 'Enregistrer le projet…', accelerator: 'CmdOrCtrl+S', click: sendAction('save-project') },
         { label: 'Charger un projet…', accelerator: 'CmdOrCtrl+O', click: sendAction('load-project') },
         { type: 'separator' },
