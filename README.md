@@ -38,19 +38,37 @@ npm start
 ```
 
 Une fenêtre s'ouvre avec le mannequin par défaut, le viewport 3D à gauche et
-le panneau de contrôle à droite.
+le panneau de contrôle à droite. Deux onglets en haut : **Corps** (mannequin
+complet) et **Main** (modèle de main indépendant, mêmes principes).
 
 - **Souris dans le viewport** : clic gauche + glisser = orbiter la caméra,
   molette = zoomer, clic droit + glisser = déplacer la caméra (pan) —
   comportement standard d'`OrbitControls`.
 - **Édition des cotes** : les sliders modifient le mannequin en temps réel.
 - **Mode posture** : cliquer sur une articulation/un volume puis glisser pour
-  la faire pivoter (ou `T` pour translater le bassin/thorax, `R` pour
+  la faire pivoter (ou `T` pour translater le bassin/thorax/tarse, `R` pour
   repasser en rotation).
-- **Colonne (Bézier)** : fait apparaître 2 poignées oranges à glisser pour
-  régler les 2 courbures de la colonne.
+- **Colonne (Bézier)** — onglet Corps uniquement : fait apparaître 2
+  poignées oranges à glisser pour régler les 2 courbures de la colonne.
+- **🖐️ Main droite / gauche** — onglet Main : bascule instantanément le
+  modèle en symétrique (mêmes cotes, juste inversé).
 - **Export PNG** / **Enregistrer / Charger le projet** : au clic, une boîte
-  de dialogue Windows s'ouvre pour choisir l'emplacement.
+  de dialogue Windows s'ouvre pour choisir l'emplacement. Export et
+  enregistrement portent sur l'**onglet actif** ; le menu Fichier propose
+  aussi *Enregistrer tout (corps + main)* pour tout sauvegarder ensemble.
+
+### Formats de fichiers projet (`.json`)
+
+Le chargement (bouton ou menu) détecte automatiquement le contenu :
+
+| Contenu du fichier                        | Détecté comme |
+|--------------------------------------------|----------------|
+| Objet plat avec `thorax`/`pelvis`/...      | Corps seul (**anciens fichiers compatibles**, aucune enveloppe) |
+| `{ "atariKind": "hand", "hand": {...} }`   | Main seule |
+| `{ "atariKind": "combined", "body": {...}, "hand": {...} }` | Les deux |
+
+Charger un fichier "main seule" ou "les deux" bascule automatiquement sur le
+bon onglet.
 
 ## 4. Générer un .exe Windows autonome
 
@@ -71,7 +89,15 @@ télécharge les binaires Electron nécessaires lors de la première exécution
 - `src/mannequin.js` — assemble la hiérarchie complète (c'est ici que se
   trouve toute la logique anatomique : positions des épaules/hanches,
   orientation par défaut, etc.)
-- `src/main-renderer.js` — scène 3D, panneau, sélection, export, fichiers.
+- `src/main-renderer.js` — scène 3D, panneau, sélection, export, fichiers
+  (onglet Corps).
+- `src/hand-params.js` / `src/hand-model.js` / `src/hand-renderer.js` —
+  mêmes rôles que `params.js` / `mannequin.js` / `main-renderer.js`, mais
+  pour l'onglet Main (tarse, pouce, doigts).
+- `src/app-controller.js` — coordonne les 2 onglets (bascule d'affichage,
+  routage des actions du menu, détection de format au chargement,
+  sauvegarde combinée). Les onglets ne se connaissent pas directement,
+  ils s'enregistrent ici via `registerTab()`.
 - `package.json` — nom, **version**, auteur, licence et lien `homepage`
   : tout ça alimente
   automatiquement la barre de titre et la fenêtre "À propos", pas besoin
@@ -104,3 +130,15 @@ télécharge les binaires Electron nécessaires lors de la première exécution
 - Pas de limites d'angle (une articulation peut donc, en théorie, pivoter
   au-delà de ce qu'un vrai coude ferait) — à ajouter si besoin dans
   `attachSelection`/`objectChange` (clamp des valeurs d'Euler).
+- **Onglet Main** : la répartition longueur/diamètre entre les 3 phalanges
+  de chaque doigt (proximale/médiane/distale) est calculée par des
+  proportions fixes (44 % / 30 % / 26 % de la longueur totale, diamètre
+  ×1 / ×0.85 / ×0.7), pas par des sliders indépendants — conforme à la
+  demande ("un seul réglage de longueur/diamètre par doigt") mais moins
+  flexible qu'un réglage phalange par phalange.
+- **Onglet Main** : pas de sphères d'articulation entre les phalanges (non
+  demandées dans le cahier des charges de la main, contrairement au
+  corps) — un léger décroché peut apparaître aux angles de pose extrêmes.
+- **Onglet Main** : le tétraèdre du pouce est une approximation générique
+  (4 sommets positionnés par une formule simple), pas un solide calé sur
+  une anatomie précise.
