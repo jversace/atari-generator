@@ -92,6 +92,32 @@ export function createCylinderContour(radius, length, color = 0x000000, radialLi
 // Utilisé pour le thorax (haut > bas) et la partie "boîte" du pelvis.
 // side: THREE.DoubleSide sur le matériau évite de se soucier du sens des
 // faces (winding) — simplification volontaire pour ce prototype.
+// Tétraèdre irrégulier à 4 sommets (v0..v3 quelconques). Utilisé pour la
+// base du pouce, accrochée au flanc du tarse. side: DoubleSide sur le
+// matériau (comme les autres volumes) évite de se soucier du sens des
+// 4 faces triangulaires.
+export function createTetrahedron(v0, v1, v2, v3) {
+  const verts = new Float32Array([
+    v0.x, v0.y, v0.z,
+    v1.x, v1.y, v1.z,
+    v2.x, v2.y, v2.z,
+    v3.x, v3.y, v3.z,
+  ]);
+  const idx = [
+    0, 1, 2,
+    0, 3, 1,
+    0, 2, 3,
+    1, 3, 2,
+  ];
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(verts, 3));
+  geo.setIndex(idx);
+  geo.computeVertexNormals();
+
+  const mesh = new THREE.Mesh(geo, VOLUME_MATERIAL());
+  return markSolidWithEdges(mesh, geo, 0x111111, 1);
+}
+
 export function createFrustumBox(topWidth, topDepth, botWidth, botDepth, height) {
   const hw = topWidth / 2, hd = topDepth / 2;
   const bw = botWidth / 2, bd = botDepth / 2;
