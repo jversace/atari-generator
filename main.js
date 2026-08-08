@@ -124,6 +124,7 @@ function buildMenu() {
           ]
         },
         { label: 'Enregistrer le projet…', accelerator: 'CmdOrCtrl+S', click: sendAction('save-project') },
+        { label: 'Enregistrer tout (corps + main)…', click: sendAction('save-project-all') },
         { label: 'Charger un projet…', accelerator: 'CmdOrCtrl+O', click: sendAction('load-project') },
         { type: 'separator' },
         { label: 'Réinitialiser', click: sendAction('reset') },

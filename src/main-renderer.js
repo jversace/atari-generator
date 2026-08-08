@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import { buildMannequin, tiltQuaternionFromCurve } from './mannequin.js';
 import { defaultParams, controlSchema, getPath, setPath } from './params.js';
+import { registerTab, triggerSmartLoad } from './app-controller.js';
 
 // ------------------------------------------------------------------
 // Scène, caméra, rendu
@@ -73,6 +74,7 @@ scene.add(mannequin.root);
 let mode = 'edit';          // 'edit' | 'pose' | 'spine'
 let poseTransformMode = 'rotate'; // 'rotate' | 'translate' (bascule T / R)
 let selectedEntry = null;   // entrée du registre ou de spineHandles actuellement saisie
+let isActive = true;        // false quand l'onglet "Main" est actif (rendu en pause)
 
 setSpineHandlesVisible(false);
 
@@ -377,19 +379,12 @@ async function doSaveProject() {
 }
 document.getElementById('btnSave').addEventListener('click', doSaveProject);
 
-async function doLoadProject() {
-  const res = await window.api.loadProject();
-  if (!res.ok) return;
-  try {
-    const loaded = JSON.parse(res.content);
-    params = { ...defaultParams(), ...loaded, pose: loaded.pose || {} };
-    buildControlsUI();
-    rebuild();
-  } catch (err) {
-    console.error('Fichier de projet invalide :', err);
-  }
+function loadParams(loaded) {
+  params = { ...defaultParams(), ...loaded, pose: loaded.pose || {} };
+  buildControlsUI();
+  rebuild();
 }
-document.getElementById('btnLoad').addEventListener('click', doLoadProject);
+document.getElementById('btnLoad').addEventListener('click', triggerSmartLoad);
 
 function doReset() {
   params = defaultParams();
@@ -399,14 +394,21 @@ function doReset() {
 document.getElementById('btnReset').addEventListener('click', doReset);
 
 // ------------------------------------------------------------------
-// Menu natif "Fichier" (main.js) — déclenche exactement les mêmes actions
-// que les boutons du panneau.
+// Enregistrement auprès du contrôleur d'onglets (app-controller.js) :
+// c'est lui qui route les actions du menu Fichier vers le bon onglet,
+// et qui bascule l'affichage. Ce module n'a pas besoin de savoir que
+// l'onglet "Main" existe.
 // ------------------------------------------------------------------
-window.api.onMenuAction((action) => {
-  if (action === 'export-png') doExportPNG();
-  if (action === 'save-project') doSaveProject();
-  if (action === 'load-project') doLoadProject();
-  if (action === 'reset') doReset();
+registerTab('body', {
+  setActive(active) {
+    isActive = active;
+    if (active) resize();
+  },
+  doExportPNG,
+  doSaveProject,
+  doReset,
+  getParams: () => params,
+  loadParams,
 });
 
 // ------------------------------------------------------------------
@@ -415,6 +417,7 @@ window.api.onMenuAction((action) => {
 resize();
 function animate() {
   requestAnimationFrame(animate);
+  if (!isActive) return;
   orbit.update();
   renderer.render(scene, camera);
 }

@@ -6,41 +6,84 @@
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div id="tabBar">
+    <button class="tab-button active" data-tab="body">🧍 Corps</button>
+    <button class="tab-button" data-tab="hand">🖐️ Main</button>
+  </div>
+
   <div id="app">
-    <div id="viewport">
-      <div id="fovOverlay">
-        <label for="fovRange">Focale</label>
-        <input type="range" id="fovRange" min="20" max="90" step="1" value="45" />
-        <span id="fovValue">45°</span>
+    <!-- Onglet Corps : structure inchangée depuis la version précédente. -->
+    <div class="tab-panel" data-tab="body">
+      <div id="viewport">
+        <div id="fovOverlay">
+          <label for="fovRange">Focale</label>
+          <input type="range" id="fovRange" min="20" max="90" step="1" value="45" />
+          <span id="fovValue">45°</span>
+        </div>
       </div>
+
+      <aside id="panel">
+        <div id="modeBar">
+          <button id="btnEditMode" class="mode active">Édition des cotes</button>
+          <button id="btnPoseMode" class="mode">Mode posture</button>
+          <button id="btnSpineMode" class="mode">Colonne (Bézier)</button>
+        </div>
+
+        <div id="poseHint" class="hint" hidden>
+          Clique gauche sur une articulation / un volume puis glisse pour la
+          déplacer ou la faire pivoter (bascule <b>T</b> = translater,
+          <b>R</b> = pivoter). Les éléments accrochés en aval suivent.
+        </div>
+        <div id="spineHint" class="hint" hidden>
+          Déplace les deux poignées (sphères oranges) pour régler les deux
+          courbures de la colonne.
+        </div>
+
+        <div id="controls"></div>
+
+        <div id="fileBar">
+          <button id="btnSave">💾 Enregistrer le projet</button>
+          <button id="btnLoad">📂 Charger un projet</button>
+          <button id="btnExport">🖼️ Exporter en PNG</button>
+          <button id="btnReset">↺ Réinitialiser</button>
+        </div>
+      </aside>
     </div>
 
-    <aside id="panel">
-      <div id="modeBar">
-        <button id="btnEditMode" class="mode active">Édition des cotes</button>
-        <button id="btnPoseMode" class="mode">Mode posture</button>
-        <button id="btnSpineMode" class="mode">Colonne (Bézier)</button>
+    <!-- Onglet Main : même principe, propre scène/caméra/panneau. -->
+    <div class="tab-panel" data-tab="hand" hidden>
+      <div id="handViewport">
+        <div id="handFovOverlay" class="fov-overlay">
+          <label for="handFovRange">Focale</label>
+          <input type="range" id="handFovRange" min="20" max="90" step="1" value="45" />
+          <span id="handFovValue">45°</span>
+        </div>
       </div>
 
-      <div id="poseHint" class="hint" hidden>
-        Clique gauche sur une articulation / un volume puis glisse pour la
-        déplacer ou la faire pivoter (bascule <b>T</b> = translater,
-        <b>R</b> = pivoter). Les éléments accrochés en aval suivent.
-      </div>
-      <div id="spineHint" class="hint" hidden>
-        Déplace les deux poignées (sphères oranges) pour régler les deux
-        courbures de la colonne.
-      </div>
+      <aside id="handPanel" class="panel">
+        <div id="handModeBar" class="mode-bar">
+          <button id="btnHandEditMode" class="mode active">Édition des cotes</button>
+          <button id="btnHandPoseMode" class="mode">Mode posture</button>
+        </div>
 
-      <div id="controls"></div>
+        <button id="btnHandedness" class="handedness"></button>
 
-      <div id="fileBar">
-        <button id="btnSave">💾 Enregistrer le projet</button>
-        <button id="btnLoad">📂 Charger un projet</button>
-        <button id="btnExport">🖼️ Exporter en PNG</button>
-        <button id="btnReset">↺ Réinitialiser</button>
-      </div>
-    </aside>
+        <div id="handPoseHint" class="hint" hidden>
+          Clique gauche sur une phalange / le tarse puis glisse pour la
+          déplacer ou la faire pivoter (bascule <b>T</b> = translater,
+          <b>R</b> = pivoter). Les éléments accrochés en aval suivent.
+        </div>
+
+        <div id="handControls"></div>
+
+        <div class="file-bar">
+          <button id="btnHandSave">💾 Enregistrer la main</button>
+          <button id="btnHandLoad">📂 Charger un projet</button>
+          <button id="btnHandExport">🖼️ Exporter en PNG</button>
+          <button id="btnHandReset">↺ Réinitialiser</button>
+        </div>
+      </aside>
+    </div>
   </div>
 
   <script type="importmap">
@@ -53,5 +96,6 @@
   }
   </script>
   <script type="module" src="./src/main-renderer.js"></script>
+  <script type="module" src="./src/hand-renderer.js"></script>
 </body>
 </html>
