@@ -19,9 +19,12 @@ export function defaultHandParams() {
     tarsus: { width: 8, thickness: 2.6, length: 9, ratio: 0.72 },
 
     thumb: {
-      base:     { width: 2.6, length: 2.8 },  // tétraèdre irrégulier (attache au tarse)
-      length:   6.2,                           // longueur totale des 2 phalanges
+      length:   6.2,  // longueur totale des 2 phalanges
       radius:   1.1
+      // La base (tétraèdre) n'a plus de cotes propres : sa largeur et sa
+      // longueur sont dérivées directement de celles du tarse (voir
+      // hand-model.js) pour rester "collée" à la main quelle que soit sa
+      // taille.
     },
 
     fingers: {
@@ -44,8 +47,6 @@ export const handControlSchema = [
     { path: 'tarsus.ratio',     label: 'Ratio poignet/doigts', min: 0.4, max: 1, step: 0.02 },
   ]},
   { group: 'Pouce', fields: [
-    { path: 'thumb.base.width',  label: 'Largeur de la base', min: 1.3, max: 5.2, step: 0.1 },
-    { path: 'thumb.base.length', label: 'Longueur de la base', min: 1.4, max: 5.6, step: 0.1 },
     { path: 'thumb.length',      label: 'Longueur des phalanges', min: 3,   max: 12,  step: 0.2 },
     { path: 'thumb.radius',      label: 'Diamètre',              min: 0.5, max: 2.2, step: 0.05 },
   ]},

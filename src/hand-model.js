@@ -115,28 +115,43 @@ export function buildHand(params) {
 
   // --- Pouce : tétraèdre irrégulier accroché au flanc du tarse, prolongé
   // de 2 cylindres (phalanges) ---------------------------------------------
-  const thumbAttachT = 0.34; // hauteur d'accroche sur le tarse (0=poignet, 1=doigts)
-  const halfWidthAt = wristWidth / 2 + (p.tarsus.width / 2 - wristWidth / 2) * thumbAttachT;
+  // Triangle de base collé et centré contre le flanc du tarse : base en
+  // haut (côté doigts, aussi large que la main), pointe en bas, presque
+  // au bord du poignet.
+  const topY = p.tarsus.length;      // haut = bord des doigts
+  const bottomY = p.tarsus.length * 0.06; // presque au bord du poignet
+  const halfBase = p.tarsus.width / 2;    // base large comme la main
+  const reach = p.tarsus.width * 0.34;    // de combien le pouce dépasse du flanc
 
   const thumbBase = new THREE.Group();
-  thumbBase.position.set(halfWidthAt, p.tarsus.length * thumbAttachT, 0);
+  thumbBase.position.set(p.tarsus.width / 2, 0, 0); // flush contre le flanc (largeur côté doigts)
   const thumbBasePose = pose.thumb_base;
   if (thumbBasePose) thumbBase.rotation.set(thumbBasePose.x, thumbBasePose.y, thumbBasePose.z);
   tarsus.add(thumbBase);
   registry.push({ id: 'thumb_base', label: 'Pouce (base)', object: thumbBase, kind: 'rotate' });
 
-  const bw = p.thumb.base.width, bl = p.thumb.base.length;
-  const tetra = createTetrahedron(
-    { x: 0, y: 0, z: 0 },
-    { x: 0, y: bl, z: 0 },
-    { x: 0, y: bl * 0.4, z: bw },
-    { x: bw * 1.3, y: bl * 0.5, z: bw * 0.25 }
-  );
+  const v0 = { x: 0, y: topY, z: -halfBase };     // base, côté doigts, flanc arrière
+  const v1 = { x: 0, y: topY, z: halfBase };      // base, côté doigts, flanc avant
+  const v2 = { x: 0, y: bottomY, z: 0 };          // pointe, côté poignet, centrée
+  const v3 = { x: reach, y: topY, z: 0 };         // sommet extérieur, à hauteur de la base
+  const tetra = createTetrahedron(v0, v1, v2, v3);
   thumbBase.add(tetra);
 
-  // Ancre au sommet (apex) du tétraèdre, d'où partent les phalanges.
+  // Accroche de la phalange : sur la face v0-v1-v3 (perpendiculaire au
+  // flanc, orientée vers le haut) — pas au centre de cette face, mais
+  // décalée vers le sommet extérieur (v3).
+  const centroid = {
+    x: (v0.x + v1.x + v3.x) / 3,
+    y: (v0.y + v1.y + v3.y) / 3,
+    z: (v0.z + v1.z + v3.z) / 3,
+  };
+  const towardV3 = 0.7; // 0 = centre de la face, 1 = exactement au sommet
   const apex = new THREE.Object3D();
-  apex.position.set(bw * 1.3, bl * 0.5, bw * 0.25);
+  apex.position.set(
+    centroid.x + (v3.x - centroid.x) * towardV3,
+    centroid.y + (v3.y - centroid.y) * towardV3,
+    centroid.z + (v3.z - centroid.z) * towardV3
+  );
   thumbBase.add(apex);
 
   const thumbSegments = splitPhalanges(
@@ -144,7 +159,7 @@ export function buildHand(params) {
     THUMB_FRACTIONS, THUMB_RADIUS_FACTORS, THUMB_NAMES, THUMB_LABELS
   );
   buildPhalanxChain(
-    apex, new THREE.Vector3(0, 0, 0), THREE.MathUtils.degToRad(-58),
+    apex, new THREE.Vector3(0, 0, 0), THREE.MathUtils.degToRad(-85),
     thumbSegments, pose, registry, 'thumb', 'Pouce'
   );
 
