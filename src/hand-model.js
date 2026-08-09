@@ -115,25 +115,33 @@ export function buildHand(params) {
 
   // --- Pouce : tétraèdre irrégulier accroché au flanc du tarse, prolongé
   // de 2 cylindres (phalanges) ---------------------------------------------
-  // Triangle de base collé et centré contre le flanc du tarse : base en
-  // haut (côté doigts, aussi large que la main), pointe en bas, presque
-  // au bord du poignet.
-  const topY = p.tarsus.length;      // haut = bord des doigts
-  const bottomY = p.tarsus.length * 0.06; // presque au bord du poignet
-  const halfBase = p.tarsus.width / 2;    // base large comme la main
-  const reach = p.tarsus.width * 0.34;    // de combien le pouce dépasse du flanc
+  // Le flanc du tarse n'est pas un plan vertical : il est conique (le
+  // tarse se rétrécit vers le poignet). Pour que le triangle de base y
+  // soit parfaitement flush, chaque sommet est calculé À la largeur/
+  // épaisseur réelles du tarse à sa propre hauteur — pas sur un plan fixe.
+  const halfWidthAt = (y) => (wristWidth / 2) + (p.tarsus.width / 2 - wristWidth / 2) * (y / p.tarsus.length);
+  const halfThickAt = (y) => (wristThickness / 2) + (p.tarsus.thickness / 2 - wristThickness / 2) * (y / p.tarsus.length);
 
+  const topY = p.tarsus.length * 0.5;      // pas plus haut que la moitié du tarse
+  const bottomY = p.tarsus.length * 0.06;  // pointe presque au bord du poignet
+  const reach = halfThickAt(topY) * 2.2;   // de combien le pouce dépasse du flanc
+
+  // Pivot du pouce = pointe du triangle (côté poignet) : un point d'ancrage
+  // anatomiquement raisonnable pour la rotation en mode Posture.
+  const pivot = { x: halfWidthAt(bottomY), y: bottomY, z: 0 };
   const thumbBase = new THREE.Group();
-  thumbBase.position.set(p.tarsus.width / 2, 0, 0); // flush contre le flanc (largeur côté doigts)
+  thumbBase.position.set(pivot.x, pivot.y, pivot.z);
   const thumbBasePose = pose.thumb_base;
   if (thumbBasePose) thumbBase.rotation.set(thumbBasePose.x, thumbBasePose.y, thumbBasePose.z);
   tarsus.add(thumbBase);
   registry.push({ id: 'thumb_base', label: 'Pouce (base)', object: thumbBase, kind: 'rotate' });
 
-  const v0 = { x: 0, y: topY, z: -halfBase };     // base, côté doigts, flanc arrière
-  const v1 = { x: 0, y: topY, z: halfBase };      // base, côté doigts, flanc avant
-  const v2 = { x: 0, y: bottomY, z: 0 };          // pointe, côté poignet, centrée
-  const v3 = { x: reach, y: topY, z: 0 };         // sommet extérieur, à hauteur de la base
+  // Sommets exprimés en coordonnées LOCALES au pivot (donc - pivot.*).
+  const wTop = halfWidthAt(topY), tTop = halfThickAt(topY);
+  const v0 = { x: wTop - pivot.x, y: topY - pivot.y, z: -tTop };            // base, côté doigts, flanc arrière
+  const v1 = { x: wTop - pivot.x, y: topY - pivot.y, z: tTop };             // base, côté doigts, flanc avant
+  const v2 = { x: 0, y: 0, z: 0 };                                          // pointe, côté poignet (= pivot)
+  const v3 = { x: wTop - pivot.x + reach, y: topY - pivot.y, z: 0 };        // sommet extérieur, à hauteur de la base
   const tetra = createTetrahedron(v0, v1, v2, v3);
   thumbBase.add(tetra);
 
@@ -154,12 +162,13 @@ export function buildHand(params) {
   );
   thumbBase.add(apex);
 
+  // Le pouce pointe à 45° de l'axe des doigts (+Y), pas à 90°.
   const thumbSegments = splitPhalanges(
     p.thumb.length, p.thumb.radius,
     THUMB_FRACTIONS, THUMB_RADIUS_FACTORS, THUMB_NAMES, THUMB_LABELS
   );
   buildPhalanxChain(
-    apex, new THREE.Vector3(0, 0, 0), THREE.MathUtils.degToRad(-85),
+    apex, new THREE.Vector3(0, 0, 0), THREE.MathUtils.degToRad(-45),
     thumbSegments, pose, registry, 'thumb', 'Pouce'
   );
 
