@@ -22,15 +22,23 @@ export function getActiveTab() {
 export function setActiveTab(name) {
   if (!tabs[name] || activeTab === name) return;
   activeTab = name;
-  for (const [key, api] of Object.entries(tabs)) {
-    api.setActive(key === name);
-  }
+
+  // L'affichage doit changer AVANT setActive() : chaque onglet appelle
+  // resize() en devenant actif, qui lit clientWidth/clientHeight du
+  // panneau — s'il est encore masqué à ce moment (display:none via
+  // [hidden]), ces valeurs sont nulles et le canvas se retrouve
+  // redimensionné à 0x0 (plus rien ne s'affiche, y compris en revenant
+  // ensuite sur l'autre onglet).
   document.querySelectorAll('.tab-button').forEach((btn) => {
     btn.classList.toggle('active', btn.dataset.tab === name);
   });
   document.querySelectorAll('.tab-panel').forEach((panel) => {
     panel.hidden = panel.dataset.tab !== name;
   });
+
+  for (const [key, api] of Object.entries(tabs)) {
+    api.setActive(key === name);
+  }
 }
 
 // --- Détection de format d'un fichier projet ------------------------------

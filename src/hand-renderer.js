@@ -23,6 +23,7 @@ viewport.appendChild(renderer.domElement);
 
 function resize() {
   const w = viewport.clientWidth, h = viewport.clientHeight;
+  if (w === 0 || h === 0) return; // panneau encore masqué (display:none) : on ignore
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
