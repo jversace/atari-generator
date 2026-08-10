@@ -40,17 +40,17 @@ export function defaultHandParams() {
 }
 
 export const handControlSchema = [
-  { group: 'Tarse', fields: [
+  { group: 'Tarse', key: 'tarsus', fields: [
     { path: 'tarsus.width',     label: 'Largeur',    min: 4,   max: 14,  step: 0.2 },
     { path: 'tarsus.thickness', label: 'Épaisseur',  min: 1.2, max: 5,   step: 0.1 },
     { path: 'tarsus.length',    label: 'Longueur',   min: 5,   max: 16,  step: 0.2 },
     { path: 'tarsus.ratio',     label: 'Ratio poignet/doigts', min: 0.4, max: 1, step: 0.02 },
   ]},
-  { group: 'Pouce', fields: [
+  { group: 'Pouce', key: 'thumb', fields: [
     { path: 'thumb.length',      label: 'Longueur des phalanges', min: 3,   max: 12,  step: 0.2 },
     { path: 'thumb.radius',      label: 'Diamètre',              min: 0.5, max: 2.2, step: 0.05 },
   ]},
-  { group: 'Doigts', fields: [
+  { group: 'Doigts', key: 'fingers', fields: [
     { path: 'fingers.index.length',  label: 'Index — longueur',   min: 5, max: 20, step: 0.2 },
     { path: 'fingers.index.radius',  label: 'Index — diamètre',   min: 0.4, max: 1.9, step: 0.05 },
     { path: 'fingers.middle.length', label: 'Majeur — longueur',  min: 5, max: 22, step: 0.2 },

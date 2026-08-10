@@ -53,9 +53,9 @@
     <h1 id="appName">—</h1>
     <div class="version" id="appVersion">—</div>
 
-    <div class="field">Auteur : <span id="appAuthor">—</span></div>
-    <div class="field">Licence : <span id="appLicense">—</span></div>
-    <div class="field"><a id="appHomepage" href="#" target="_blank">Voir le dépôt GitHub</a></div>
+    <div class="field"><span id="lblAuthor"></span> : <span id="appAuthor">—</span></div>
+    <div class="field"><span id="lblLicense"></span> : <span id="appLicense">—</span></div>
+    <div class="field"><a id="appHomepage" href="#" target="_blank"></a></div>
 
     <div id="extra">
       <!-- Ajoute ici ce que tu veux (remerciements, crédits, etc.) -->
@@ -64,11 +64,17 @@
 
   <script>
     window.aboutAPI.getInfo().then((info) => {
+      const lang = window.i18nData[info.language] ? info.language : 'en';
+      const t = (key) => window.i18nData[lang][key] || key;
+
       document.getElementById('appName').textContent = info.name;
       document.getElementById('appVersion').textContent = `Version ${info.version}`;
+      document.getElementById('lblAuthor').textContent = t('about.author');
+      document.getElementById('lblLicense').textContent = t('about.license');
       document.getElementById('appAuthor').textContent = info.author || '—';
       document.getElementById('appLicense').textContent = info.license || '—';
       const link = document.getElementById('appHomepage');
+      link.textContent = t('about.repo');
       if (info.homepage) {
         link.href = info.homepage;
       } else {

@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import { buildMannequin, tiltQuaternionFromCurve } from './mannequin.js';
 import { defaultParams, controlSchema, getPath, setPath } from './params.js';
-import { registerTab, triggerSmartLoad } from './app-controller.js';
+import { registerTab, triggerSmartLoad, t } from './app-controller.js';
 
 // ------------------------------------------------------------------
 // Scène, caméra, rendu
@@ -16,7 +16,7 @@ scene.background = new THREE.Color(0x2b2b2b);
 const camera = new THREE.PerspectiveCamera(45, 1, 0.5, 3000);
 camera.position.set(170, 140, 230);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, alpha: true });
 viewport.appendChild(renderer.domElement);
 
 function resize() {
@@ -34,7 +34,7 @@ window.addEventListener('resize', resize);
 // (la case peut être cochée/décochée à tout moment pendant que l'appli
 // tourne).
 // ------------------------------------------------------------------
-let exportOptions = { constructionMode: false, includeGrid: false };
+let exportOptions = { constructionMode: false, includeGrid: false, transparentBackground: false };
 window.api.getExportOptions().then((opts) => { if (opts) exportOptions = opts; });
 window.api.onExportOptionsChanged((opts) => { exportOptions = opts; });
 
@@ -56,6 +56,14 @@ scene.add(sun);
 
 const grid = new THREE.GridHelper(400, 40, 0x555555, 0x3a3a3a);
 scene.add(grid);
+// Grille dédiée à l'export PNG : gris clair (40%), pour rester discrète à
+// côté des traits noirs du personnage. GridHelper fige ses couleurs à la
+// construction (pas de material.color à changer après coup), d'où cette
+// seconde instance plutôt qu'une bascule de couleur sur la même grille.
+const EXPORT_GRID_GRAY = 0x999999; // ~40% de noir (255 * (1 - 0.4) ≈ 153 = 0x99)
+const exportGrid = new THREE.GridHelper(400, 40, EXPORT_GRID_GRAY, EXPORT_GRID_GRAY);
+exportGrid.visible = false;
+scene.add(exportGrid);
 
 const orbit = new OrbitControls(camera, renderer.domElement);
 orbit.target.set(0, 95, 0);
@@ -89,7 +97,7 @@ function buildControlsUI() {
   for (const group of controlSchema) {
     const title = document.createElement('div');
     title.className = 'group-title';
-    title.textContent = group.group;
+    title.textContent = t('group.' + group.key);
     controlsRoot.appendChild(title);
 
     for (const field of group.fields) {
@@ -99,7 +107,7 @@ function buildControlsUI() {
       const label = document.createElement('label');
       const valueSpan = document.createElement('span');
       valueSpan.textContent = getPath(params, field.path).toFixed(1);
-      label.textContent = field.label + ' ';
+      label.textContent = t('field.' + field.path) + ' ';
       label.appendChild(valueSpan);
 
       const input = document.createElement('input');
@@ -328,10 +336,18 @@ btnSpine.addEventListener('click', () => setMode('spine'));
 async function doExportPNG() {
   const prevBg = scene.background;
   const prevGridVisible = grid.visible;
+  const prevClearAlpha = renderer.getClearAlpha();
   const prevVisible = mannequin.spineHandles.map(h => h.object.visible);
   setSpineHandlesVisible(false);
-  scene.background = new THREE.Color(0xffffff);
-  grid.visible = exportOptions.includeGrid;
+  if (exportOptions.transparentBackground) {
+    scene.background = null;
+    renderer.setClearAlpha(0);
+  } else {
+    scene.background = new THREE.Color(0xffffff);
+    renderer.setClearAlpha(1);
+  }
+  grid.visible = false;
+  exportGrid.visible = exportOptions.includeGrid;
   transformControls.detach();
 
   // Mode traits de construction : tout reste affiché (têtes, volumes,
@@ -360,6 +376,8 @@ async function doExportPNG() {
 
   scene.background = prevBg;
   grid.visible = prevGridVisible;
+  exportGrid.visible = false;
+  renderer.setClearAlpha(prevClearAlpha);
   restoreMaterials.forEach(({ mat, transparent, opacity, depthWrite }) => {
     mat.transparent = transparent;
     mat.opacity = opacity;
@@ -410,6 +428,7 @@ registerTab('body', {
   doReset,
   getParams: () => params,
   loadParams,
+  refreshLanguage: buildControlsUI,
 });
 
 // ------------------------------------------------------------------

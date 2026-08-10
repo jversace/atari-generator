@@ -5,10 +5,12 @@
 // natif (main.js) vers le bon onglet.
 //
 // C'est aussi ici que vit la détection de format au chargement (corps
-// seul / main seule / les 2 / ancien fichier corps sans enveloppe) et la
-// sauvegarde combinée — la seule vraie nouveauté transverse aux 2 onglets.
+// seul / main seule / les 2 / ancien fichier corps sans enveloppe), la
+// sauvegarde combinée, et le cœur de l'internationalisation (t(), et la
+// synchronisation avec la langue choisie dans le menu natif Options >
+// Langue, dont main.js reste la seule source de vérité persistée).
 
-const tabs = {}; // nom -> { setActive, doExportPNG, doSaveProject, doReset, getParams, loadParams }
+const tabs = {}; // nom -> { setActive, doExportPNG, doSaveProject, doReset, getParams, loadParams, refreshLanguage }
 let activeTab = 'body';
 
 export function registerTab(name, api) {
@@ -41,6 +43,41 @@ export function setActiveTab(name) {
   }
 }
 
+// --- Internationalisation --------------------------------------------------
+// Le dictionnaire est chargé par preload.js (lecture fs synchrone) et
+// exposé tel quel — pas de fetch() asynchrone nécessaire pour un simple
+// fichier JSON local. Seule la LANGUE COURANTE (persistée côté main.js)
+// a besoin d'un aller-retour IPC.
+const translations = window.i18nData;
+
+export let currentLang = await window.api.getLanguage();
+
+export function t(key, vars) {
+  let str = (translations[currentLang] && translations[currentLang][key]) || key;
+  if (vars) {
+    for (const [k, v] of Object.entries(vars)) str = str.replace(`{${k}}`, v);
+  }
+  return str;
+}
+
+function applyStaticTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach((el) => {
+    el.innerHTML = t(el.dataset.i18nHtml);
+  });
+}
+applyStaticTranslations();
+
+window.api.onLanguageChanged((lang) => {
+  currentLang = lang;
+  applyStaticTranslations();
+  for (const api of Object.values(tabs)) {
+    api.refreshLanguage?.();
+  }
+});
+
 // --- Détection de format d'un fichier projet ------------------------------
 // - Ancien format (corps seul, sans enveloppe) : détecté par la présence
 //   d'une clé propre au corps (thorax/pelvis/upperArm) — reste compatible
@@ -62,7 +99,7 @@ async function doLoadProjectSmart() {
   try {
     json = JSON.parse(res.content);
   } catch (err) {
-    console.error('Fichier de projet invalide (JSON illisible) :', err);
+    console.error('Invalid project file (unreadable JSON):', err);
     return;
   }
 
@@ -78,7 +115,7 @@ async function doLoadProjectSmart() {
     tabs.hand.loadParams(json.hand);
     // On reste sur l'onglet déjà actif : les deux ont été chargés.
   } else {
-    console.error('Format de fichier projet non reconnu.');
+    console.error('Unrecognized project file format.');
   }
 }
 

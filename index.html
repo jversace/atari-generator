@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <title>Atari Generator</title>
@@ -7,8 +7,8 @@
 </head>
 <body>
   <div id="tabBar">
-    <button class="tab-button active" data-tab="body">🧍 Corps</button>
-    <button class="tab-button" data-tab="hand">🖐️ Main</button>
+    <button class="tab-button active" data-tab="body">🧍 <span data-i18n="tab.body"></span></button>
+    <button class="tab-button" data-tab="hand">🖐️ <span data-i18n="tab.hand"></span></button>
   </div>
 
   <div id="app">
@@ -16,7 +16,7 @@
     <div class="tab-panel" data-tab="body">
       <div id="viewport">
         <div id="fovOverlay">
-          <label for="fovRange">Focale</label>
+          <label for="fovRange" data-i18n="panel.fov"></label>
           <input type="range" id="fovRange" min="20" max="90" step="1" value="45" />
           <span id="fovValue">45°</span>
         </div>
@@ -24,28 +24,21 @@
 
       <aside id="panel">
         <div id="modeBar">
-          <button id="btnEditMode" class="mode active">Édition des cotes</button>
-          <button id="btnPoseMode" class="mode">Mode posture</button>
-          <button id="btnSpineMode" class="mode">Colonne (Bézier)</button>
+          <button id="btnEditMode" class="mode active" data-i18n="panel.mode.edit"></button>
+          <button id="btnPoseMode" class="mode" data-i18n="panel.mode.pose"></button>
+          <button id="btnSpineMode" class="mode" data-i18n="panel.mode.spine"></button>
         </div>
 
-        <div id="poseHint" class="hint" hidden>
-          Clique gauche sur une articulation / un volume puis glisse pour la
-          déplacer ou la faire pivoter (bascule <b>T</b> = translater,
-          <b>R</b> = pivoter). Les éléments accrochés en aval suivent.
-        </div>
-        <div id="spineHint" class="hint" hidden>
-          Déplace les deux poignées (sphères oranges) pour régler les deux
-          courbures de la colonne.
-        </div>
+        <div id="poseHint" class="hint" hidden data-i18n-html="panel.hint.pose"></div>
+        <div id="spineHint" class="hint" hidden data-i18n="panel.hint.spine"></div>
 
         <div id="controls"></div>
 
         <div id="fileBar">
-          <button id="btnSave">💾 Enregistrer le projet</button>
-          <button id="btnLoad">📂 Charger un projet</button>
-          <button id="btnExport">🖼️ Exporter en PNG</button>
-          <button id="btnReset">↺ Réinitialiser</button>
+          <button id="btnSave">💾 <span data-i18n="panel.file.saveBody"></span></button>
+          <button id="btnLoad">📂 <span data-i18n="panel.file.load"></span></button>
+          <button id="btnExport">🖼️ <span data-i18n="panel.file.export"></span></button>
+          <button id="btnReset">↺ <span data-i18n="panel.file.reset"></span></button>
         </div>
       </aside>
     </div>
@@ -54,7 +47,7 @@
     <div class="tab-panel" data-tab="hand" hidden>
       <div id="handViewport">
         <div id="handFovOverlay" class="fov-overlay">
-          <label for="handFovRange">Focale</label>
+          <label for="handFovRange" data-i18n="panel.fov"></label>
           <input type="range" id="handFovRange" min="20" max="90" step="1" value="45" />
           <span id="handFovValue">45°</span>
         </div>
@@ -62,25 +55,21 @@
 
       <aside id="handPanel" class="panel">
         <div id="handModeBar" class="mode-bar">
-          <button id="btnHandEditMode" class="mode active">Édition des cotes</button>
-          <button id="btnHandPoseMode" class="mode">Mode posture</button>
+          <button id="btnHandEditMode" class="mode active" data-i18n="panel.mode.edit"></button>
+          <button id="btnHandPoseMode" class="mode" data-i18n="panel.mode.pose"></button>
         </div>
 
         <button id="btnHandedness" class="handedness"></button>
 
-        <div id="handPoseHint" class="hint" hidden>
-          Clique gauche sur une phalange / le tarse puis glisse pour la
-          déplacer ou la faire pivoter (bascule <b>T</b> = translater,
-          <b>R</b> = pivoter). Les éléments accrochés en aval suivent.
-        </div>
+        <div id="handPoseHint" class="hint" hidden data-i18n-html="panel.hint.pose.hand"></div>
 
         <div id="handControls"></div>
 
         <div class="file-bar">
-          <button id="btnHandSave">💾 Enregistrer la main</button>
-          <button id="btnHandLoad">📂 Charger un projet</button>
-          <button id="btnHandExport">🖼️ Exporter en PNG</button>
-          <button id="btnHandReset">↺ Réinitialiser</button>
+          <button id="btnHandSave">💾 <span data-i18n="panel.file.saveHand"></span></button>
+          <button id="btnHandLoad">📂 <span data-i18n="panel.file.load"></span></button>
+          <button id="btnHandExport">🖼️ <span data-i18n="panel.file.export"></span></button>
+          <button id="btnHandReset">↺ <span data-i18n="panel.file.reset"></span></button>
         </div>
       </aside>
     </div>

@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import { buildHand } from './hand-model.js';
 import { defaultHandParams, handControlSchema, getPath, setPath } from './hand-params.js';
-import { registerTab, triggerSmartLoad } from './app-controller.js';
+import { registerTab, triggerSmartLoad, t } from './app-controller.js';
 
 // ------------------------------------------------------------------
 // Scène, caméra, rendu — indépendants de l'onglet Corps (sa propre
@@ -18,7 +18,7 @@ scene.background = new THREE.Color(0x2b2b2b);
 const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 500);
 camera.position.set(22, 18, 28);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, alpha: true });
 viewport.appendChild(renderer.domElement);
 
 function resize() {
@@ -31,7 +31,7 @@ function resize() {
 window.addEventListener('resize', resize);
 
 // Options d'export (partagées avec l'onglet Corps, mêmes réglages).
-let exportOptions = { constructionMode: false, includeGrid: false };
+let exportOptions = { constructionMode: false, includeGrid: false, transparentBackground: false };
 window.api.getExportOptions().then((opts) => { if (opts) exportOptions = opts; });
 window.api.onExportOptionsChanged((opts) => { exportOptions = opts; });
 
@@ -86,7 +86,7 @@ function buildControlsUI() {
   for (const group of handControlSchema) {
     const title = document.createElement('div');
     title.className = 'group-title';
-    title.textContent = group.group;
+    title.textContent = t('group.' + group.key);
     controlsRoot.appendChild(title);
 
     for (const field of group.fields) {
@@ -96,7 +96,7 @@ function buildControlsUI() {
       const label = document.createElement('label');
       const valueSpan = document.createElement('span');
       valueSpan.textContent = getPath(params, field.path).toFixed(2);
-      label.textContent = field.label + ' ';
+      label.textContent = t('field.' + field.path) + ' ';
       label.appendChild(valueSpan);
 
       const input = document.createElement('input');
@@ -256,8 +256,8 @@ btnPose.addEventListener('click', () => setMode('pose'));
 const btnHandedness = document.getElementById('btnHandedness');
 function updateHandednessLabel() {
   btnHandedness.textContent = params.handedness === 'right'
-    ? '🖐️ Main droite (cliquer pour gauche)'
-    : '🖐️ Main gauche (cliquer pour droite)';
+    ? t('hand.handedness.right')
+    : t('hand.handedness.left');
 }
 btnHandedness.addEventListener('click', () => {
   params.handedness = params.handedness === 'right' ? 'left' : 'right';
@@ -273,7 +273,14 @@ updateHandednessLabel();
 async function doExportPNG() {
   const prevBg = scene.background;
   const prevGridVisible = grid.visible;
-  scene.background = new THREE.Color(0xffffff);
+  const prevClearAlpha = renderer.getClearAlpha();
+  if (exportOptions.transparentBackground) {
+    scene.background = null;
+    renderer.setClearAlpha(0);
+  } else {
+    scene.background = new THREE.Color(0xffffff);
+    renderer.setClearAlpha(1);
+  }
   grid.visible = false;
   exportGrid.visible = exportOptions.includeGrid;
   transformControls.detach();
@@ -298,6 +305,7 @@ async function doExportPNG() {
   scene.background = prevBg;
   grid.visible = prevGridVisible;
   exportGrid.visible = false;
+  renderer.setClearAlpha(prevClearAlpha);
   restoreMaterials.forEach(({ mat, transparent, opacity, depthWrite }) => {
     mat.transparent = transparent;
     mat.opacity = opacity;
@@ -348,6 +356,10 @@ registerTab('hand', {
   doReset,
   getParams: () => params,
   loadParams,
+  refreshLanguage() {
+    buildControlsUI();
+    updateHandednessLabel();
+  },
 });
 
 // ------------------------------------------------------------------
