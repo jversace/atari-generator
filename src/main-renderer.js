@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import { buildMannequin, tiltQuaternionFromCurve } from './mannequin.js';
 import { defaultParams, controlSchema, getPath, setPath } from './params.js';
+import { registerTab, triggerSmartLoad, t } from './app-controller.js';
 
 // ------------------------------------------------------------------
 // Scène, caméra, rendu
@@ -15,11 +16,12 @@ scene.background = new THREE.Color(0x2b2b2b);
 const camera = new THREE.PerspectiveCamera(45, 1, 0.5, 3000);
 camera.position.set(170, 140, 230);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, alpha: true });
 viewport.appendChild(renderer.domElement);
 
 function resize() {
   const w = viewport.clientWidth, h = viewport.clientHeight;
+  if (w === 0 || h === 0) return; // panneau encore masqué (display:none) : on ignore
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
@@ -32,7 +34,7 @@ window.addEventListener('resize', resize);
 // (la case peut être cochée/décochée à tout moment pendant que l'appli
 // tourne).
 // ------------------------------------------------------------------
-let exportOptions = { constructionMode: false, includeGrid: false };
+let exportOptions = { constructionMode: false, includeGrid: false, transparentBackground: false };
 window.api.getExportOptions().then((opts) => { if (opts) exportOptions = opts; });
 window.api.onExportOptionsChanged((opts) => { exportOptions = opts; });
 
@@ -54,6 +56,14 @@ scene.add(sun);
 
 const grid = new THREE.GridHelper(400, 40, 0x555555, 0x3a3a3a);
 scene.add(grid);
+// Grille dédiée à l'export PNG : gris clair (40%), pour rester discrète à
+// côté des traits noirs du personnage. GridHelper fige ses couleurs à la
+// construction (pas de material.color à changer après coup), d'où cette
+// seconde instance plutôt qu'une bascule de couleur sur la même grille.
+const EXPORT_GRID_GRAY = 0x999999; // ~40% de noir (255 * (1 - 0.4) ≈ 153 = 0x99)
+const exportGrid = new THREE.GridHelper(400, 40, EXPORT_GRID_GRAY, EXPORT_GRID_GRAY);
+exportGrid.visible = false;
+scene.add(exportGrid);
 
 const orbit = new OrbitControls(camera, renderer.domElement);
 orbit.target.set(0, 95, 0);
@@ -73,6 +83,7 @@ scene.add(mannequin.root);
 let mode = 'edit';          // 'edit' | 'pose' | 'spine'
 let poseTransformMode = 'rotate'; // 'rotate' | 'translate' (bascule T / R)
 let selectedEntry = null;   // entrée du registre ou de spineHandles actuellement saisie
+let isActive = true;        // false quand l'onglet "Main" est actif (rendu en pause)
 
 setSpineHandlesVisible(false);
 
@@ -86,7 +97,7 @@ function buildControlsUI() {
   for (const group of controlSchema) {
     const title = document.createElement('div');
     title.className = 'group-title';
-    title.textContent = group.group;
+    title.textContent = t('group.' + group.key);
     controlsRoot.appendChild(title);
 
     for (const field of group.fields) {
@@ -96,7 +107,7 @@ function buildControlsUI() {
       const label = document.createElement('label');
       const valueSpan = document.createElement('span');
       valueSpan.textContent = getPath(params, field.path).toFixed(1);
-      label.textContent = field.label + ' ';
+      label.textContent = t('field.' + field.path) + ' ';
       label.appendChild(valueSpan);
 
       const input = document.createElement('input');
@@ -325,10 +336,18 @@ btnSpine.addEventListener('click', () => setMode('spine'));
 async function doExportPNG() {
   const prevBg = scene.background;
   const prevGridVisible = grid.visible;
+  const prevClearAlpha = renderer.getClearAlpha();
   const prevVisible = mannequin.spineHandles.map(h => h.object.visible);
   setSpineHandlesVisible(false);
-  scene.background = new THREE.Color(0xffffff);
-  grid.visible = exportOptions.includeGrid;
+  if (exportOptions.transparentBackground) {
+    scene.background = null;
+    renderer.setClearAlpha(0);
+  } else {
+    scene.background = new THREE.Color(0xffffff);
+    renderer.setClearAlpha(1);
+  }
+  grid.visible = false;
+  exportGrid.visible = exportOptions.includeGrid;
   transformControls.detach();
 
   // Mode traits de construction : tout reste affiché (têtes, volumes,
@@ -357,6 +376,8 @@ async function doExportPNG() {
 
   scene.background = prevBg;
   grid.visible = prevGridVisible;
+  exportGrid.visible = false;
+  renderer.setClearAlpha(prevClearAlpha);
   restoreMaterials.forEach(({ mat, transparent, opacity, depthWrite }) => {
     mat.transparent = transparent;
     mat.opacity = opacity;
@@ -377,19 +398,12 @@ async function doSaveProject() {
 }
 document.getElementById('btnSave').addEventListener('click', doSaveProject);
 
-async function doLoadProject() {
-  const res = await window.api.loadProject();
-  if (!res.ok) return;
-  try {
-    const loaded = JSON.parse(res.content);
-    params = { ...defaultParams(), ...loaded, pose: loaded.pose || {} };
-    buildControlsUI();
-    rebuild();
-  } catch (err) {
-    console.error('Fichier de projet invalide :', err);
-  }
+function loadParams(loaded) {
+  params = { ...defaultParams(), ...loaded, pose: loaded.pose || {} };
+  buildControlsUI();
+  rebuild();
 }
-document.getElementById('btnLoad').addEventListener('click', doLoadProject);
+document.getElementById('btnLoad').addEventListener('click', triggerSmartLoad);
 
 function doReset() {
   params = defaultParams();
@@ -399,14 +413,22 @@ function doReset() {
 document.getElementById('btnReset').addEventListener('click', doReset);
 
 // ------------------------------------------------------------------
-// Menu natif "Fichier" (main.js) — déclenche exactement les mêmes actions
-// que les boutons du panneau.
+// Enregistrement auprès du contrôleur d'onglets (app-controller.js) :
+// c'est lui qui route les actions du menu Fichier vers le bon onglet,
+// et qui bascule l'affichage. Ce module n'a pas besoin de savoir que
+// l'onglet "Main" existe.
 // ------------------------------------------------------------------
-window.api.onMenuAction((action) => {
-  if (action === 'export-png') doExportPNG();
-  if (action === 'save-project') doSaveProject();
-  if (action === 'load-project') doLoadProject();
-  if (action === 'reset') doReset();
+registerTab('body', {
+  setActive(active) {
+    isActive = active;
+    if (active) resize();
+  },
+  doExportPNG,
+  doSaveProject,
+  doReset,
+  getParams: () => params,
+  loadParams,
+  refreshLanguage: buildControlsUI,
 });
 
 // ------------------------------------------------------------------
@@ -415,6 +437,7 @@ window.api.onMenuAction((action) => {
 resize();
 function animate() {
   requestAnimationFrame(animate);
+  if (!isActive) return;
   orbit.update();
   renderer.render(scene, camera);
 }

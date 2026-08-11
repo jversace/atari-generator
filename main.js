@@ -7,14 +7,13 @@ const { app, BrowserWindow, ipcMain, dialog, Menu, shell } = require('electron')
 const path = require('path');
 const fs = require('fs');
 const pkg = require('./package.json');
+const translations = require('./src/translations.json');
 
 const APP_NAME = (pkg.build && pkg.build.productName) || pkg.name;
 
 let mainWindow;
 
-// --- Mémorisation du dernier répertoire utilisé --------------------------
-// Persisté dans le dossier de données utilisateur de l'app (survit aux
-// redémarrages), pas dans le projet lui-même.
+// --- Configuration persistée (dernier répertoire, options d'export, langue)
 const configPath = path.join(app.getPath('userData'), 'atari-generator-config.json');
 
 function loadConfig() {
@@ -35,9 +34,10 @@ function saveConfig(config) {
 
 let config = loadConfig();
 config.exportOptions = Object.assign(
-  { constructionMode: false, includeGrid: false },
+  { constructionMode: false, includeGrid: false, transparentBackground: false },
   config.exportOptions || {}
 );
+config.language = config.language || 'en'; // anglais par défaut
 
 function rememberDir(filePath) {
   config.lastDir = path.dirname(filePath);
@@ -48,6 +48,15 @@ function rememberDir(filePath) {
 // répertoire utilisé (mémorisé) + nom de fichier par défaut.
 function defaultPathFor(filename) {
   return config.lastDir ? path.join(config.lastDir, filename) : filename;
+}
+
+// --- Traduction (labels du menu natif + titres de boîtes de dialogue) ----
+function t(key, vars) {
+  let str = (translations[config.language] && translations[config.language][key]) || key;
+  if (vars) {
+    for (const [k, v] of Object.entries(vars)) str = str.replace(`{${k}}`, v);
+  }
+  return str;
 }
 
 // --- Fenêtre "À propos" ---------------------------------------------------
@@ -64,7 +73,7 @@ function openAboutWindow() {
     maximizable: false,
     parent: mainWindow,
     modal: true,
-    title: `À propos de ${APP_NAME}`,
+    title: t('menu.help.about', { app: APP_NAME }),
     backgroundColor: '#1e1e1e',
     webPreferences: {
       preload: path.join(__dirname, 'about-preload.js'),
@@ -84,10 +93,13 @@ ipcMain.handle('get-about-info', () => ({
   version: pkg.version,
   author: pkg.author,
   license: pkg.license,
-  homepage: pkg.homepage
+  homepage: pkg.homepage,
+  language: config.language
 }));
 
 ipcMain.handle('get-export-options', () => config.exportOptions);
+ipcMain.handle('get-language', () => config.language);
+ipcMain.handle('get-translations', () => translations);
 
 // --- Menu ------------------------------------------------------------
 function buildMenu() {
@@ -101,66 +113,103 @@ function buildMenu() {
     if (mainWindow) mainWindow.webContents.send('export-options-changed', config.exportOptions);
   };
 
+  const setLanguage = (lang) => () => {
+    if (config.language === lang) return;
+    config.language = lang;
+    saveConfig(config);
+    if (mainWindow) mainWindow.webContents.send('language-changed', lang);
+    buildMenu(); // reconstruit le menu avec les nouveaux libellés
+  };
+
   const template = [
     {
-      label: 'Fichier',
+      label: t('menu.file'),
       submenu: [
-        { label: 'Exporter en PNG…', click: sendAction('export-png') },
+        { label: t('menu.file.export'), click: sendAction('export-png') },
+        { label: t('menu.file.saveActive'), accelerator: 'CmdOrCtrl+S', click: sendAction('save-project') },
+        { label: t('menu.file.saveAll'), click: sendAction('save-project-all') },
+        { label: t('menu.file.load'), accelerator: 'CmdOrCtrl+O', click: sendAction('load-project') },
+        { type: 'separator' },
+        { label: t('menu.file.reset'), click: sendAction('reset') },
+        { type: 'separator' },
+        { role: 'quit', label: t('menu.file.quit') }
+      ]
+    },
+    {
+      label: t('menu.options'),
+      submenu: [
         {
-          label: 'Options d\'export',
+          label: t('menu.options.export'),
           submenu: [
             {
-              label: 'Mode traits de construction',
+              label: t('menu.options.constructionMode'),
               type: 'checkbox',
               checked: config.exportOptions.constructionMode,
               click: toggleExportOption('constructionMode')
             },
             {
-              label: 'Inclure le plan',
+              label: t('menu.options.includeGrid'),
               type: 'checkbox',
               checked: config.exportOptions.includeGrid,
               click: toggleExportOption('includeGrid')
+            },
+            {
+              label: t('menu.options.transparentBg'),
+              type: 'checkbox',
+              checked: config.exportOptions.transparentBackground,
+              click: toggleExportOption('transparentBackground')
             }
           ]
         },
-        { label: 'Enregistrer le projet…', accelerator: 'CmdOrCtrl+S', click: sendAction('save-project') },
-        { label: 'Charger un projet…', accelerator: 'CmdOrCtrl+O', click: sendAction('load-project') },
-        { type: 'separator' },
-        { label: 'Réinitialiser', click: sendAction('reset') },
-        { type: 'separator' },
-        { role: 'quit', label: 'Quitter' }
+        {
+          label: t('menu.options.language'),
+          submenu: [
+            {
+              label: t('menu.options.language.en'),
+              type: 'radio',
+              checked: config.language === 'en',
+              click: setLanguage('en')
+            },
+            {
+              label: t('menu.options.language.fr'),
+              type: 'radio',
+              checked: config.language === 'fr',
+              click: setLanguage('fr')
+            }
+          ]
+        }
       ]
     },
     {
-      label: 'Affichage',
+      label: t('menu.view'),
       submenu: [
-        { role: 'reload', label: 'Recharger' },
-        { role: 'forceReload', label: 'Forcer le rechargement' },
-        { role: 'toggleDevTools', label: 'Outils de développement' },
+        { role: 'reload', label: t('menu.view.reload') },
+        { role: 'forceReload', label: t('menu.view.forceReload') },
+        { role: 'toggleDevTools', label: t('menu.view.devTools') },
         { type: 'separator' },
-        { role: 'resetZoom', label: 'Taille réelle' },
-        { role: 'zoomIn', label: 'Zoom avant' },
-        { role: 'zoomOut', label: 'Zoom arrière' },
+        { role: 'resetZoom', label: t('menu.view.actualSize') },
+        { role: 'zoomIn', label: t('menu.view.zoomIn') },
+        { role: 'zoomOut', label: t('menu.view.zoomOut') },
         { type: 'separator' },
-        { role: 'togglefullscreen', label: 'Plein écran' }
+        { role: 'togglefullscreen', label: t('menu.view.fullscreen') }
       ]
     },
     {
-      label: 'Fenêtre',
+      label: t('menu.window'),
       submenu: [
-        { role: 'minimize', label: 'Réduire' },
-        { role: 'close', label: 'Fermer' }
+        { role: 'minimize', label: t('menu.window.minimize') },
+        { role: 'close', label: t('menu.window.close') }
       ]
     },
     {
-      label: 'Aide',
+      label: t('menu.help'),
       submenu: [
         {
-          label: 'Documentation',
+          label: t('menu.help.docs'),
           click: () => { if (pkg.homepage) shell.openExternal(pkg.homepage); }
         },
         { type: 'separator' },
-        { label: `À propos de ${APP_NAME}`, click: openAboutWindow }
+        { label: t('menu.help.about', { app: APP_NAME }), click: openAboutWindow }
       ]
     }
   ];
@@ -187,7 +236,8 @@ function createWindow() {
   mainWindow.on('page-title-updated', (event) => event.preventDefault());
 
   mainWindow.loadFile('index.html');
-  // Décommente la ligne suivante si tu as besoin de déboguer à nouveau :
+  // Réactivées temporairement le temps de confirmer le correctif i18n —
+  // recommente cette ligne une fois que tout s'affiche correctement.
   // mainWindow.webContents.openDevTools();
 }
 
@@ -209,9 +259,9 @@ app.on('window-all-closed', () => {
 // puis on écrit les octets sur disque.
 ipcMain.handle('export-png', async (event, dataUrl) => {
   const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
-    title: 'Exporter en PNG',
+    title: t('dialog.exportPng.title'),
     defaultPath: defaultPathFor('atari.png'),
-    filters: [{ name: 'Images PNG', extensions: ['png'] }]
+    filters: [{ name: 'PNG', extensions: ['png'] }]
   });
   if (canceled || !filePath) return { ok: false };
 
@@ -224,9 +274,9 @@ ipcMain.handle('export-png', async (event, dataUrl) => {
 // --- Sauvegarde de projet (JSON des paramètres) ------------------------
 ipcMain.handle('save-project', async (event, jsonString) => {
   const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
-    title: 'Enregistrer le projet',
+    title: t('dialog.saveProject.title'),
     defaultPath: defaultPathFor('projet.atari.json'),
-    filters: [{ name: 'Projet Atari', extensions: ['json'] }]
+    filters: [{ name: 'Atari project', extensions: ['json'] }]
   });
   if (canceled || !filePath) return { ok: false };
 
@@ -238,9 +288,9 @@ ipcMain.handle('save-project', async (event, jsonString) => {
 // --- Chargement de projet ----------------------------------------------
 ipcMain.handle('load-project', async () => {
   const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
-    title: 'Charger un projet',
+    title: t('dialog.loadProject.title'),
     defaultPath: config.lastDir || undefined,
-    filters: [{ name: 'Projet Atari', extensions: ['json'] }],
+    filters: [{ name: 'Atari project', extensions: ['json'] }],
     properties: ['openFile']
   });
   if (canceled || filePaths.length === 0) return { ok: false };

@@ -74,25 +74,25 @@ export function defaultParams() {
 // Schéma déclaratif -> génère automatiquement les sliders du panneau.
 // path = chemin dans l'objet params, séparé par des points.
 export const controlSchema = [
-  { group: 'Tête / cou', fields: [
+  { group: 'Tête / cou', key: 'head_neck', fields: [
     { path: 'head.width',  label: 'Largeur tête',  min: 7,  max: 28, step: 0.5 },
     { path: 'head.height', label: 'Hauteur tête',   min: 10, max: 40, step: 0.5 },
     { path: 'head.depth',  label: 'Profondeur tête',min: 7,  max: 30, step: 0.5 },
     { path: 'neck.height', label: 'Hauteur cou',    min: 3,  max: 14, step: 0.5 },
   ]},
-  { group: 'Colonne', fields: [
+  { group: 'Colonne', key: 'spine', fields: [
     { path: 'spine.length', label: 'Longueur colonne', min: 8, max: 32, step: 1 },
     { path: 'spine.curve1', label: 'Courbure basse (lombaire)', min: -16, max: 16, step: 0.5 },
     { path: 'spine.curve2', label: 'Courbure haute (thoracique)', min: -16, max: 16, step: 0.5 },
   ]},
-  { group: 'Thorax', fields: [
+  { group: 'Thorax', key: 'thorax', fields: [
     { path: 'thorax.topWidth',  label: 'Largeur haute', min: 17, max: 68, step: 0.5 },
     { path: 'thorax.topDepth',  label: 'Profondeur haute', min: 9, max: 36, step: 0.5 },
     { path: 'thorax.botWidth',  label: 'Largeur basse', min: 12, max: 48, step: 0.5 },
     { path: 'thorax.botDepth',  label: 'Profondeur basse', min: 6, max: 26, step: 0.5 },
     { path: 'thorax.height',    label: 'Hauteur', min: 22, max: 88, step: 0.5 },
   ]},
-  { group: 'Bassin / pelvis', fields: [
+  { group: 'Bassin / pelvis', key: 'pelvis', fields: [
     { path: 'pelvis.topWidth',  label: 'Largeur iliaque', min: 13, max: 52, step: 0.5 },
     { path: 'pelvis.topDepth',  label: 'Profondeur iliaque', min: 7, max: 30, step: 0.5 },
     { path: 'pelvis.botWidth',  label: 'Largeur basse', min: 10, max: 40, step: 0.5 },
@@ -100,7 +100,7 @@ export const controlSchema = [
     { path: 'pelvis.height',    label: 'Hauteur bloc', min: 6, max: 24, step: 0.5 },
     { path: 'pelvis.wedgeHeight', label: 'Hauteur du coin', min: 5, max: 20, step: 0.5 },
   ]},
-  { group: 'Bras (les 2 côtés)', fields: [
+  { group: 'Bras (les 2 côtés)', key: 'arms', fields: [
     { path: 'upperArm.length', label: 'Longueur bras',    min: 14, max: 58, step: 0.5 },
     { path: 'upperArm.radius', label: 'Diamètre bras',    min: 1,  max: 5.2, step: 0.2 },
     { path: 'forearm.length',  label: 'Longueur avant-bras', min: 12, max: 48, step: 0.5 },
@@ -108,7 +108,7 @@ export const controlSchema = [
     { path: 'hand.length',     label: 'Longueur main', min: 8, max: 34, step: 0.5 },
     { path: 'hand.width',      label: 'Largeur main',  min: 4,  max: 15, step: 0.5 },
   ]},
-  { group: 'Jambes (les 2 côtés)', fields: [
+  { group: 'Jambes (les 2 côtés)', key: 'legs', fields: [
     { path: 'thigh.length', label: 'Longueur cuisse', min: 22, max: 88, step: 0.5 },
     { path: 'thigh.radius', label: 'Diamètre cuisse', min: 2,  max: 8.6, step: 0.2 },
     { path: 'shin.length',  label: 'Longueur tibia',  min: 20, max: 80, step: 0.5 },
@@ -116,7 +116,7 @@ export const controlSchema = [
     { path: 'foot.length',  label: 'Longueur pied',   min: 12, max: 48, step: 0.5 },
     { path: 'foot.width',   label: 'Largeur pied',    min: 4.5, max: 18, step: 0.5 },
   ]},
-  { group: 'Articulations (diamètre)', fields: [
+  { group: 'Articulations (diamètre)', key: 'joints', fields: [
     { path: 'joints.shoulder', label: 'Épaule', min: 2, max: 9.2, step: 0.2 },
     { path: 'joints.elbow',    label: 'Coude',  min: 1.5, max: 7.2, step: 0.2 },
     { path: 'joints.wrist',    label: 'Poignet',min: 1,  max: 5.2, step: 0.2 },
