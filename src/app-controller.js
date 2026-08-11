@@ -48,9 +48,21 @@ export function setActiveTab(name) {
 // exposé tel quel — pas de fetch() asynchrone nécessaire pour un simple
 // fichier JSON local. Seule la LANGUE COURANTE (persistée côté main.js)
 // a besoin d'un aller-retour IPC.
-const translations = window.i18nData;
+//
+// Défensif à dessein : main-renderer.js et hand-renderer.js IMPORTENT ce
+// module — si son évaluation de haut niveau lève une exception (IPC en
+// échec, dictionnaire absent...), les deux onglets ne se chargeraient
+// plus du tout (ni le rendu 3D, ni les libellés). Mieux vaut retomber sur
+// l'anglais brut que de tout bloquer.
+const translations = window.i18nData || {};
 
-export let currentLang = await window.api.getLanguage();
+export let currentLang = 'en';
+try {
+  currentLang = await window.api.getLanguage();
+  if (!translations[currentLang]) currentLang = 'en';
+} catch (err) {
+  console.error('Could not read the saved language, defaulting to English:', err);
+}
 
 export function t(key, vars) {
   let str = (translations[currentLang] && translations[currentLang][key]) || key;

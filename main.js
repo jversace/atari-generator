@@ -235,8 +235,9 @@ function createWindow() {
   mainWindow.on('page-title-updated', (event) => event.preventDefault());
 
   mainWindow.loadFile('index.html');
-  // Décommente la ligne suivante si tu as besoin de déboguer à nouveau :
-  // mainWindow.webContents.openDevTools();
+  // Réactivées temporairement le temps de confirmer le correctif i18n —
+  // recommente cette ligne une fois que tout s'affiche correctement.
+  mainWindow.webContents.openDevTools();
 }
 
 app.whenReady().then(() => {
