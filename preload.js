@@ -1,10 +1,14 @@
 // preload.js — Pont sécurisé entre le renderer (page web) et le processus
 // principal (accès disque). On n'expose que des fonctions précises, jamais
 // tout ipcRenderer ou tout Node.js.
+//
+// IMPORTANT : Electron sandboxe les scripts preload par défaut (depuis la
+// v20) — require('fs')/require('path') n'y sont PAS disponibles, seul
+// require('electron') l'est. Tout accès disque (y compris lire un simple
+// fichier JSON comme translations.json) doit donc passer par un appel IPC
+// vers le processus principal, jamais par un require() direct ici.
 
 const { contextBridge, ipcRenderer } = require('electron');
-const fs = require('fs');
-const path = require('path');
 
 contextBridge.exposeInMainWorld('api', {
   exportPNG: (dataUrl) => ipcRenderer.invoke('export-png', dataUrl),
@@ -17,15 +21,9 @@ contextBridge.exposeInMainWorld('api', {
   // persistées côté main.js.
   getExportOptions: () => ipcRenderer.invoke('get-export-options'),
   onExportOptionsChanged: (callback) => ipcRenderer.on('export-options-changed', (event, options) => callback(options)),
-  // Langue courante (menu Options > Langue), persistée côté main.js.
+  // Langue courante (menu Options > Langue) et dictionnaire de traduction,
+  // tous deux lus côté main.js (voir get-language / get-translations).
   getLanguage: () => ipcRenderer.invoke('get-language'),
-  onLanguageChanged: (callback) => ipcRenderer.on('language-changed', (event, lang) => callback(lang))
+  onLanguageChanged: (callback) => ipcRenderer.on('language-changed', (event, lang) => callback(lang)),
+  getTranslations: () => ipcRenderer.invoke('get-translations')
 });
-
-// Dictionnaire de traduction : lu une fois, de façon SYNCHRONE (le preload
-// a accès à Node/fs), et exposé tel quel — évite un fetch() asynchrone
-// côté renderer pour un simple fichier JSON local.
-const translations = JSON.parse(
-  fs.readFileSync(path.join(__dirname, 'src', 'translations.json'), 'utf-8')
-);
-contextBridge.exposeInMainWorld('i18nData', translations);

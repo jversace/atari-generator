@@ -63,9 +63,9 @@
   </div>
 
   <script>
-    window.aboutAPI.getInfo().then((info) => {
-      const lang = window.i18nData[info.language] ? info.language : 'en';
-      const t = (key) => window.i18nData[lang][key] || key;
+    Promise.all([window.aboutAPI.getInfo(), window.aboutAPI.getTranslations()]).then(([info, translations]) => {
+      const lang = translations[info.language] ? info.language : 'en';
+      const t = (key) => (translations[lang] && translations[lang][key]) || key;
 
       document.getElementById('appName').textContent = info.name;
       document.getElementById('appVersion').textContent = `Version ${info.version}`;

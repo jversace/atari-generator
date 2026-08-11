@@ -44,24 +44,23 @@ export function setActiveTab(name) {
 }
 
 // --- Internationalisation --------------------------------------------------
-// Le dictionnaire est chargé par preload.js (lecture fs synchrone) et
-// exposé tel quel — pas de fetch() asynchrone nécessaire pour un simple
-// fichier JSON local. Seule la LANGUE COURANTE (persistée côté main.js)
-// a besoin d'un aller-retour IPC.
+// Dictionnaire ET langue courante lus via IPC (main.js -> get-translations /
+// get-language) : le preload est sandboxé par défaut et n'a pas accès à
+// fs/path pour lire le JSON lui-même (voir preload.js).
 //
 // Défensif à dessein : main-renderer.js et hand-renderer.js IMPORTENT ce
 // module — si son évaluation de haut niveau lève une exception (IPC en
-// échec, dictionnaire absent...), les deux onglets ne se chargeraient
-// plus du tout (ni le rendu 3D, ni les libellés). Mieux vaut retomber sur
-// l'anglais brut que de tout bloquer.
-const translations = window.i18nData || {};
-
+// échec...), les deux onglets ne se chargeraient plus du tout (ni le
+// rendu 3D, ni les libellés). Mieux vaut retomber sur l'anglais brut/les
+// clés que de tout bloquer.
+let translations = {};
 export let currentLang = 'en';
 try {
+  translations = await window.api.getTranslations();
   currentLang = await window.api.getLanguage();
   if (!translations[currentLang]) currentLang = 'en';
 } catch (err) {
-  console.error('Could not read the saved language, defaulting to English:', err);
+  console.error('Could not load translations/language, defaulting to English:', err);
 }
 
 export function t(key, vars) {

@@ -99,6 +99,7 @@ ipcMain.handle('get-about-info', () => ({
 
 ipcMain.handle('get-export-options', () => config.exportOptions);
 ipcMain.handle('get-language', () => config.language);
+ipcMain.handle('get-translations', () => translations);
 
 // --- Menu ------------------------------------------------------------
 function buildMenu() {
