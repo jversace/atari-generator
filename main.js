@@ -238,7 +238,7 @@ function createWindow() {
   mainWindow.loadFile('index.html');
   // Réactivées temporairement le temps de confirmer le correctif i18n —
   // recommente cette ligne une fois que tout s'affiche correctement.
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 }
 
 app.whenReady().then(() => {
