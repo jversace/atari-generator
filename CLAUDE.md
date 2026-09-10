@@ -130,8 +130,30 @@ développeur Windows, OU lancer le terminal en administrateur, OU
 ## 4. Onglet Corps — spécification géométrique
 
 Toutes les cotes ci-dessous sont réglables en temps réel (`src/params.js`
-→ `controlSchema`, plages doublées par rapport aux valeurs par défaut :
-mini ≈ défaut/2, maxi ≈ défaut×2). Unités arbitraires ~cm.
+→ `controlSchema`). **Chaque slider est centré sur sa propre valeur par
+défaut** (mini = défaut×0,5, maxi = défaut×1,5 — sauf `spine.curve1`/
+`curve2`, en écart additif symétrique ±16, car leur défaut peut être 0 ou
+négatif) : on peut ajuster aussi bien à la baisse qu'à la hausse à partir
+de la référence. Historique : ces plages étaient auparavant asymétriques
+(mini défaut/2, maxi défaut×2, donc pas centrées) — changé sur demande
+explicite. Unités arbitraires ~cm.
+
+⚠️ **Les valeurs par défaut ont été corrigées une fois** (comparaison
+avec les repères classiques du dessin d'anatomie — crotch à 50% de la
+hauteur totale, tronc hanche-épaule ~30-31%, tête ~13%, cou ~3-4%). Si on
+retouche les proportions de référence, le mannequin par défaut fait
+maintenant ~174 unités (~8,3 têtes) avec `spine.length: 11` (était 18),
+`thorax.height: 25.5` (était 29.5), `neck.height: 7` (était 4) — tout le
+reste inchangé. **`pose.pelvis` et `pose.thorax` n'ont plus de position
+figée (px/py/pz)**, seulement une rotation : la position se recalcule
+automatiquement à partir de la longueur des jambes / de la colonne (voir
+§ "Couplage courbure ↔ inclinaison" plus bas), pour que toute future
+correction de ces cotes reste cohérente sans avoir à retoucher la pose à
+la main. Piège corrigé au passage : `mannequin.js` vérifiait la position
+du bassin avec `pelvisPose ? pelvisPose.px : 0` (undefined si l'objet
+existe mais sans px) au lieu de `pelvisPose && pelvisPose.px !==
+undefined` comme le thorax le faisait déjà — à surveiller si on
+retouche encore la structure de `pose`.
 
 - **Membres** (bras/avant-bras/cuisses/tibias/cou) : segments "fil de
   fer" = cylindres fins (`geometry.js` → `createLimbSegment`), 2 segments
@@ -152,7 +174,8 @@ mini ≈ défaut/2, maxi ≈ défaut×2). Unités arbitraires ~cm.
   "portion thoracique", continue la colonne à travers le thorax jusqu'au
   cou, voir `mannequin.js` → `thoracicSpine`). Erreur commise puis
   corrigée : au départ `spine.length` couvrait toute la colonne, donnant
-  un espace bassin/thorax bien trop grand même au minimum du slider.
+  un espace bassin/thorax bien trop grand même au minimum du slider (et
+  contribuait au tronc trop long corrigé ci-dessus).
 - **Colonne accrochée par la face arrière** : le tube de la colonne et le
   volume du thorax sont décalés en Z pour que la colonne semble passer
   DERRIÈRE la cage thoracique (pas en son centre) — voir
