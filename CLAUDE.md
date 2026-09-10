@@ -244,6 +244,12 @@ quand même ce qu'il y a derrière lui dans le tampon de profondeur
   n'a pas de canal alpha, quoi qu'on fasse par ailleurs) +
   `scene.background = null` + `renderer.setClearAlpha(0)` pendant
   l'export, restaurés après.
+- **Résolution d'export** : ×4 par rapport à la taille affichée du
+  viewport (`EXPORT_RESOLUTION_SCALE`, en tête de
+  `main-renderer.js`/`hand-renderer.js`). `renderer.setSize(w*4, h*4,
+  false)` juste avant le rendu puis restauration à la taille normale —
+  le `false` (3ᵉ argument) est important : il change la résolution
+  interne du canvas SANS toucher à sa taille CSS affichée à l'écran.
 
 ## 7. Formats de fichiers projet (JSON)
 
