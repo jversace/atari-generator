@@ -10,6 +10,11 @@ import { registerTab, triggerSmartLoad, t } from './app-controller.js';
 // ------------------------------------------------------------------
 const viewport = document.getElementById('viewport');
 
+// Le PNG exporté est rendu à cette résolution multipliée par rapport à
+// la taille affichée du viewport (image plus nette, indépendante de la
+// taille de la fenêtre).
+const EXPORT_RESOLUTION_SCALE = 4;
+
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x2b2b2b);
 
@@ -371,8 +376,12 @@ async function doExportPNG() {
     });
   }
 
+  const exportW = viewport.clientWidth * EXPORT_RESOLUTION_SCALE;
+  const exportH = viewport.clientHeight * EXPORT_RESOLUTION_SCALE;
+  renderer.setSize(exportW, exportH, false); // false = ne touche pas à la taille CSS affichée
   renderer.render(scene, camera);
   const dataUrl = renderer.domElement.toDataURL('image/png');
+  renderer.setSize(viewport.clientWidth, viewport.clientHeight, false);
 
   scene.background = prevBg;
   grid.visible = prevGridVisible;

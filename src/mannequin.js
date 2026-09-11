@@ -157,10 +157,11 @@ export function buildMannequin(params) {
   // --- Bassin ----------------------------------------------------------
   const pelvis = new THREE.Group();
   const pelvisPose = pose.pelvis;
+  const hasPelvisPosition = !!(pelvisPose && pelvisPose.px !== undefined);
   pelvis.position.set(
-    pelvisPose ? pelvisPose.px : 0,
-    pelvisPose ? pelvisPose.py : legLength,
-    pelvisPose ? pelvisPose.pz : 0
+    hasPelvisPosition ? pelvisPose.px : 0,
+    hasPelvisPosition ? pelvisPose.py : legLength,
+    hasPelvisPosition ? pelvisPose.pz : 0
   );
   const hasPelvisOverride = !!pelvisPose;
   if (pelvisPose) {
