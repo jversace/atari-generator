@@ -25,5 +25,10 @@ contextBridge.exposeInMainWorld('api', {
   // tous deux lus côté main.js (voir get-language / get-translations).
   getLanguage: () => ipcRenderer.invoke('get-language'),
   onLanguageChanged: (callback) => ipcRenderer.on('language-changed', (event, lang) => callback(lang)),
-  getTranslations: () => ipcRenderer.invoke('get-translations')
+  getTranslations: () => ipcRenderer.invoke('get-translations'),
+  // Modèle de référence (menu Options > Modèle), persisté côté main.js.
+  // La confirmation ("les cotes vont être réinitialisées") est gérée
+  // côté main.js AVANT l'envoi de cet événement.
+  getModel: () => ipcRenderer.invoke('get-model'),
+  onModelChanged: (callback) => ipcRenderer.on('model-changed', (event, modelId) => callback(modelId))
 });

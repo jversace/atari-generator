@@ -38,6 +38,12 @@ config.exportOptions = Object.assign(
   config.exportOptions || {}
 );
 config.language = config.language || 'en'; // anglais par défaut
+config.model = config.model || 'male'; // modèle de référence par défaut
+
+// Modèles de référence disponibles pour le sous-menu Options > Modèle.
+// Les COTES de chaque modèle vivent côté renderer (src/params.js) — ici
+// on n'a besoin que de la liste des identifiants pour construire le menu.
+const MODEL_IDS = ['male', 'female'];
 
 function rememberDir(filePath) {
   config.lastDir = path.dirname(filePath);
@@ -100,6 +106,7 @@ ipcMain.handle('get-about-info', () => ({
 ipcMain.handle('get-export-options', () => config.exportOptions);
 ipcMain.handle('get-language', () => config.language);
 ipcMain.handle('get-translations', () => translations);
+ipcMain.handle('get-model', () => config.model);
 
 // --- Menu ------------------------------------------------------------
 function buildMenu() {
@@ -119,6 +126,27 @@ function buildMenu() {
     saveConfig(config);
     if (mainWindow) mainWindow.webContents.send('language-changed', lang);
     buildMenu(); // reconstruit le menu avec les nouveaux libellés
+  };
+
+  // Change de modèle de référence APRÈS confirmation — les cotes du
+  // corps seront réinitialisées (pas la posture), donc on prévient
+  // avant. Si l'utilisateur annule, on reconstruit quand même le menu
+  // pour annuler le cochage automatique de l'item radio cliqué.
+  const selectModel = (modelId) => async () => {
+    if (config.model === modelId) return;
+    const { response } = await dialog.showMessageBox(mainWindow, {
+      type: 'warning',
+      title: t('dialog.selectModel.title'),
+      message: t('dialog.selectModel.message'),
+      buttons: [t('dialog.selectModel.confirm'), t('dialog.selectModel.cancel')],
+      defaultId: 0,
+      cancelId: 1
+    });
+    if (response !== 0) { buildMenu(); return; }
+    config.model = modelId;
+    saveConfig(config);
+    if (mainWindow) mainWindow.webContents.send('model-changed', modelId);
+    buildMenu();
   };
 
   const template = [
@@ -177,6 +205,15 @@ function buildMenu() {
               click: setLanguage('fr')
             }
           ]
+        },
+        {
+          label: t('menu.options.model'),
+          submenu: MODEL_IDS.map((id) => ({
+            label: t(`menu.options.model.${id}`),
+            type: 'radio',
+            checked: config.model === id,
+            click: selectModel(id)
+          }))
         }
       ]
     },

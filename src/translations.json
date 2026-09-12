@@ -3,7 +3,6 @@
     "app.name": "Atari Generator",
     "tab.body": "Body",
     "tab.hand": "Hand",
-
     "menu.file": "File",
     "menu.file.export": "Export as PNG…",
     "menu.file.saveActive": "Save active tab…",
@@ -11,7 +10,6 @@
     "menu.file.load": "Load a project…",
     "menu.file.reset": "Reset",
     "menu.file.quit": "Quit",
-
     "menu.options": "Options",
     "menu.options.export": "Export options",
     "menu.options.constructionMode": "Construction-lines mode",
@@ -20,7 +18,6 @@
     "menu.options.language": "Language",
     "menu.options.language.en": "English",
     "menu.options.language.fr": "Français",
-
     "menu.view": "View",
     "menu.view.reload": "Reload",
     "menu.view.forceReload": "Force reload",
@@ -29,41 +26,32 @@
     "menu.view.zoomIn": "Zoom in",
     "menu.view.zoomOut": "Zoom out",
     "menu.view.fullscreen": "Toggle fullscreen",
-
     "menu.window": "Window",
     "menu.window.minimize": "Minimize",
     "menu.window.close": "Close",
-
     "menu.help": "Help",
     "menu.help.docs": "Documentation",
     "menu.help.about": "About {app}",
-
     "dialog.exportPng.title": "Export as PNG",
     "dialog.saveProject.title": "Save project",
     "dialog.loadProject.title": "Load a project",
-
     "panel.mode.edit": "Edit dimensions",
     "panel.mode.pose": "Pose mode",
     "panel.mode.spine": "Spine (Bézier)",
     "panel.hint.pose": "Left-click a joint/volume then drag to move or rotate it (toggle <b>T</b> = translate, <b>R</b> = rotate). Everything downstream follows.",
     "panel.hint.spine": "Drag the two handles (orange spheres) to adjust the two curvatures of the spine.",
     "panel.hint.pose.hand": "Left-click a phalanx/the carpus then drag to move or rotate it (toggle <b>T</b> = translate, <b>R</b> = rotate). Everything downstream follows.",
-
     "panel.file.saveBody": "Save body",
     "panel.file.saveHand": "Save hand",
     "panel.file.load": "Load a project",
     "panel.file.export": "Export as PNG",
     "panel.file.reset": "Reset",
-
     "panel.fov": "Focal length",
-
     "hand.handedness.right": "🖐️ Right hand (click for left)",
     "hand.handedness.left": "🖐️ Left hand (click for right)",
-
     "about.author": "Author",
     "about.license": "License",
     "about.repo": "View GitHub repository",
-
     "group.head_neck": "Head / neck",
     "group.spine": "Spine",
     "group.thorax": "Thorax",
@@ -74,7 +62,6 @@
     "group.tarsus": "Carpus",
     "group.thumb": "Thumb",
     "group.fingers": "Fingers",
-
     "field.head.width": "Head width",
     "field.head.height": "Head height",
     "field.head.depth": "Head depth",
@@ -111,7 +98,6 @@
     "field.joints.hip": "Hip",
     "field.joints.knee": "Knee",
     "field.joints.ankle": "Ankle",
-
     "field.tarsus.width": "Width",
     "field.tarsus.thickness": "Thickness",
     "field.tarsus.length": "Length",
@@ -125,13 +111,19 @@
     "field.fingers.ring.length": "Ring — length",
     "field.fingers.ring.radius": "Ring — diameter",
     "field.fingers.pinky.length": "Pinky — length",
-    "field.fingers.pinky.radius": "Pinky — diameter"
+    "field.fingers.pinky.radius": "Pinky — diameter",
+    "menu.options.model": "Model",
+    "menu.options.model.male": "Male",
+    "menu.options.model.female": "Female",
+    "dialog.selectModel.title": "Change reference model",
+    "dialog.selectModel.message": "Switching the reference model will reset all body dimensions to the new model’s defaults. The current pose will be kept. Continue?",
+    "dialog.selectModel.confirm": "Change model",
+    "dialog.selectModel.cancel": "Cancel"
   },
   "fr": {
     "app.name": "Atari Generator",
     "tab.body": "Corps",
     "tab.hand": "Main",
-
     "menu.file": "Fichier",
     "menu.file.export": "Exporter en PNG…",
     "menu.file.saveActive": "Enregistrer l'onglet actif…",
@@ -139,7 +131,6 @@
     "menu.file.load": "Charger un projet…",
     "menu.file.reset": "Réinitialiser",
     "menu.file.quit": "Quitter",
-
     "menu.options": "Options",
     "menu.options.export": "Options d'export",
     "menu.options.constructionMode": "Mode traits de construction",
@@ -148,7 +139,6 @@
     "menu.options.language": "Langue",
     "menu.options.language.en": "English",
     "menu.options.language.fr": "Français",
-
     "menu.view": "Affichage",
     "menu.view.reload": "Recharger",
     "menu.view.forceReload": "Forcer le rechargement",
@@ -157,41 +147,32 @@
     "menu.view.zoomIn": "Zoom avant",
     "menu.view.zoomOut": "Zoom arrière",
     "menu.view.fullscreen": "Plein écran",
-
     "menu.window": "Fenêtre",
     "menu.window.minimize": "Réduire",
     "menu.window.close": "Fermer",
-
     "menu.help": "Aide",
     "menu.help.docs": "Documentation",
     "menu.help.about": "À propos de {app}",
-
     "dialog.exportPng.title": "Exporter en PNG",
     "dialog.saveProject.title": "Enregistrer le projet",
     "dialog.loadProject.title": "Charger un projet",
-
     "panel.mode.edit": "Édition des cotes",
     "panel.mode.pose": "Mode posture",
     "panel.mode.spine": "Colonne (Bézier)",
     "panel.hint.pose": "Clique gauche sur une articulation/un volume puis glisse pour la déplacer ou la faire pivoter (bascule <b>T</b> = translater, <b>R</b> = pivoter). Les éléments accrochés en aval suivent.",
     "panel.hint.spine": "Déplace les deux poignées (sphères oranges) pour régler les deux courbures de la colonne.",
     "panel.hint.pose.hand": "Clique gauche sur une phalange/le tarse puis glisse pour la déplacer ou la faire pivoter (bascule <b>T</b> = translater, <b>R</b> = pivoter). Les éléments accrochés en aval suivent.",
-
     "panel.file.saveBody": "Enregistrer le corps",
     "panel.file.saveHand": "Enregistrer la main",
     "panel.file.load": "Charger un projet",
     "panel.file.export": "Exporter en PNG",
     "panel.file.reset": "Réinitialiser",
-
     "panel.fov": "Focale",
-
     "hand.handedness.right": "🖐️ Main droite (cliquer pour gauche)",
     "hand.handedness.left": "🖐️ Main gauche (cliquer pour droite)",
-
     "about.author": "Auteur",
     "about.license": "Licence",
     "about.repo": "Voir le dépôt GitHub",
-
     "group.head_neck": "Tête / cou",
     "group.spine": "Colonne",
     "group.thorax": "Thorax",
@@ -202,7 +183,6 @@
     "group.tarsus": "Tarse",
     "group.thumb": "Pouce",
     "group.fingers": "Doigts",
-
     "field.head.width": "Largeur tête",
     "field.head.height": "Hauteur tête",
     "field.head.depth": "Profondeur tête",
@@ -239,7 +219,6 @@
     "field.joints.hip": "Hanche",
     "field.joints.knee": "Genou",
     "field.joints.ankle": "Cheville",
-
     "field.tarsus.width": "Largeur",
     "field.tarsus.thickness": "Épaisseur",
     "field.tarsus.length": "Longueur",
@@ -253,6 +232,13 @@
     "field.fingers.ring.length": "Annulaire — longueur",
     "field.fingers.ring.radius": "Annulaire — diamètre",
     "field.fingers.pinky.length": "Auriculaire — longueur",
-    "field.fingers.pinky.radius": "Auriculaire — diamètre"
+    "field.fingers.pinky.radius": "Auriculaire — diamètre",
+    "menu.options.model": "Modèle",
+    "menu.options.model.male": "Homme",
+    "menu.options.model.female": "Femme",
+    "dialog.selectModel.title": "Changer de mannequin de référence",
+    "dialog.selectModel.message": "Changer de mannequin de référence va réinitialiser toutes les cotes du corps sur les valeurs du nouveau modèle. La posture actuelle sera conservée. Continuer ?",
+    "dialog.selectModel.confirm": "Changer de modèle",
+    "dialog.selectModel.cancel": "Annuler"
   }
 }

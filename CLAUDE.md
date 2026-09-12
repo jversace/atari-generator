@@ -220,6 +220,55 @@ retouche encore la structure de `pose`.
   écoute le même événement — bug déjà rencontré : plus de contrôle
   caméra en mode Posture).
 
+## 4.1 Modèles de référence multiples (Homme / Femme)
+
+`src/params.js` exporte `referenceModels = { male: {...}, female: {...} }`
+— chacun un jeu complet de cotes (mêmes clés que `defaultParams()`
+retournait avant, SANS `pose`). `getReferenceDimensions(modelId)` renvoie
+le bon jeu (repli sur `male` si `modelId` inconnu). `defaultParams(modelId
+= 'male')` combine ces cotes avec `defaultPose()` (posture de repos,
+**partagée entre les modèles** — seules les cotes varient, jamais
+demandé de posture différente par modèle).
+
+- **Femme** : approximation stylisée (carrure/thorax plus étroits,
+  bassin relativement plus large que les épaules — contrairement au
+  ratio épaules>hanches du modèle homme —, silhouette ~159 unités au
+  lieu de ~174, ossature plus fine). Valeurs choisies par Claude à dire
+  d'expert, pas une donnée médicale ni validées par l'utilisateur au
+  moment de la rédaction — à ajuster si le rendu ne convient pas.
+- **Sélection du modèle** : menu **Options > Modèle** (`main.js` →
+  `buildMenu()`, items `type: 'radio'`, un par entrée de `MODEL_IDS =
+  ['male', 'female']` — cette liste ne vit QUE dans `main.js`, qui n'a
+  besoin que des identifiants pour construire le menu, pas des cotes).
+- **Confirmation avant changement** : `dialog.showMessageBox` (natif,
+  côté `main.js`) avant d'envoyer `model-changed` au renderer. Si annulé,
+  `buildMenu()` est quand même rappelé pour annuler le cochage radio
+  automatique du clic (Electron coche l'item cliqué avant que le
+  handler ne s'exécute — il faut reconstruire le menu depuis `config.model`
+  pour corriger l'affichage si l'utilisateur a annulé).
+- **Changer de modèle ≠ Réinitialiser** : `main-renderer.js` →
+  `onModelChanged` applique les nouvelles cotes en **préservant
+  `params.pose` telle quelle** (posture jamais touchée). Le bouton/menu
+  **Réinitialiser** (`doReset`), lui, appelle `defaultParams(currentModel)`
+  et réinitialise donc TOUT y compris la posture — deux actions
+  distinctes, ne pas les confondre en cas de retouche.
+- **Plages de sliders calculées à la volée** : `controlSchema` ne
+  contient plus de `min`/`max` en dur (seulement `path`/`step`, plus un
+  `range: { additive: N }` optionnel pour `spine.curve1`/`curve2`, dont
+  le défaut peut être 0/négatif). `computeFieldRange(defaultValue, field)`
+  calcule `[défaut×0,5, défaut×1,5]` (ou l'écart additif) à la demande —
+  `buildControlsUI()` l'appelle avec les cotes du modèle ACTIF
+  (`getReferenceDimensions(currentModel)`), donc changer de modèle
+  recalcule automatiquement toutes les plages sans code dédié. Piège
+  évité : ne pas revenir à des `min`/`max` codés en dur dans le schéma,
+  ça casserait le recalcul par modèle.
+- **Persisté** : `config.model` (comme la langue/les options d'export),
+  défaut `'male'`.
+- ⚠️ Cette fonctionnalité est scopée à l'**onglet Corps uniquement** —
+  `hand-params.js`/`hand-renderer.js` gardent leur ancien schéma à
+  `min`/`max` fixes, pas de notion de modèle pour la main (jamais
+  demandé).
+
 ## 5. Architecture à onglets (Corps / Main)
 
 Deux scènes/caméras/`OrbitControls`/`TransformControls` **entièrement
