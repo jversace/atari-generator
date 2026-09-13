@@ -251,14 +251,29 @@ demandé de posture différente par modèle).
   `enfant` est volontairement unisexe (peu de différenciation avant la
   puberté) ; `adolescent`/`adolescente` commencent à diverger (largeur
   d'épaules vs de bassin) mais moins nettement que `male`/`female`.
-  Cible approximative ~6,5 têtes (enfant), ~7,2-7,3 têtes (ados), à
-  comparer aux ~8,3/8,15 têtes des adultes. Même réserve que pour
-  "Femme" : approximations stylisées, pas des données médicales.
+  Cible approximative : ~6,5 têtes / ~110 unités (enfant), ~7,75-8,1
+  têtes / **156,5 unités pour les deux** (adolescent/adolescente, ciblés
+  13-14 ans) — **hauteur volontairement égale entre les deux sexes à cet
+  âge** : à la puberté, les filles ont leur pic de croissance ~2 ans
+  avant les garçons, donc à 13-14 ans elles sont en moyenne à hauteur
+  égale voire légèrement devant (retour utilisateur explicite,
+  initialement les deux ados étaient trop jeunes ET l'adolescente plus
+  courte que l'adolescent — corrigé). Adulte : ~8,3/8,15 têtes. Même
+  réserve que pour "Femme" : approximations stylisées, pas des données
+  médicales. Piège méthodologique déjà rencontré en ajustant ces
+  valeurs : une mise à l'échelle UNIFORME d'un modèle plus jeune vers
+  une cible plus haute fait aussi grossir la tête au-delà de sa taille
+  adulte (la tête est presque formée dès ~10-12 ans, c'est le corps qui
+  continue de grandir) — ajuster chaque segment indépendamment, jamais
+  juste multiplier tous les champs par un même facteur.
 - **Sélection du modèle** : menu **Options > Modèle** (`main.js` →
   `buildMenu()`, items `type: 'radio'`, un par entrée de `MODEL_IDS`
-  (liste dans `main.js`, actuellement `['male', 'female', 'enfant',
-  'adolescent', 'adolescente']`) — cette liste ne vit QUE dans `main.js`,
-  qui n'a besoin que des identifiants pour construire le menu, pas des
+  (liste dans `main.js`, actuellement `['male', 'female', 'adolescent',
+  'adolescente', 'enfant']` — `enfant` en dernier sur demande explicite ;
+  l'ordre des clés dans `referenceModels` (`params.js`) n'a pas besoin de
+  correspondre, seul l'ordre de `MODEL_IDS` pilote l'affichage du menu)
+  — cette liste ne vit QUE dans `main.js`, qui n'a besoin que des
+  identifiants pour construire le menu, pas des
   cotes).
 - **Confirmation avant changement** : `dialog.showMessageBox` (natif,
   côté `main.js`) avant d'envoyer `model-changed` au renderer. Si annulé,
