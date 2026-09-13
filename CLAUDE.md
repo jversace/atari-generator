@@ -220,9 +220,10 @@ retouche encore la structure de `pose`.
   écoute le même événement — bug déjà rencontré : plus de contrôle
   caméra en mode Posture).
 
-## 4.1 Modèles de référence multiples (Homme / Femme)
+## 4.1 Modèles de référence multiples (Homme / Femme / Enfant / Adolescent(e))
 
-`src/params.js` exporte `referenceModels = { male: {...}, female: {...} }`
+`src/params.js` exporte `referenceModels = { male, female, enfant,
+adolescent, adolescente }` (dans cet ordre dans `MODEL_IDS`, `main.js`)
 — chacun un jeu complet de cotes (mêmes clés que `defaultParams()`
 retournait avant, SANS `pose`). `getReferenceDimensions(modelId)` renvoie
 le bon jeu (repli sur `male` si `modelId` inconnu). `defaultParams(modelId
@@ -236,10 +237,29 @@ demandé de posture différente par modèle).
   lieu de ~174, ossature plus fine). Valeurs choisies par Claude à dire
   d'expert, pas une donnée médicale ni validées par l'utilisateur au
   moment de la rédaction — à ajuster si le rendu ne convient pas.
+- **Enfant / Adolescent / Adolescente** : PAS une simple mise à l'échelle
+  uniforme des adultes — deux effets de croissance respectés
+  volontairement (repères classiques de dessin de figure, Loomis et al.) :
+  1. la tête grandit beaucoup moins vite que le reste du corps (tête/
+     hauteur totale : enfant ~15,5% -> ado ~13,7% -> adulte ~12,1%) ;
+  2. les jambes sont proportionnellement COURTES chez l'enfant et
+     s'allongent en approchant l'âge adulte — l'entrejambe n'est PAS à
+     50% de la hauteur comme chez l'adulte (jambe/hauteur totale :
+     enfant ~42,7% -> ado ~46,5% -> adulte 50,2%). Une mise à l'échelle
+     linéaire naïve des adultes donnerait des enfants avec des jambes
+     bien trop longues et une tête bien trop petite.
+  `enfant` est volontairement unisexe (peu de différenciation avant la
+  puberté) ; `adolescent`/`adolescente` commencent à diverger (largeur
+  d'épaules vs de bassin) mais moins nettement que `male`/`female`.
+  Cible approximative ~6,5 têtes (enfant), ~7,2-7,3 têtes (ados), à
+  comparer aux ~8,3/8,15 têtes des adultes. Même réserve que pour
+  "Femme" : approximations stylisées, pas des données médicales.
 - **Sélection du modèle** : menu **Options > Modèle** (`main.js` →
-  `buildMenu()`, items `type: 'radio'`, un par entrée de `MODEL_IDS =
-  ['male', 'female']` — cette liste ne vit QUE dans `main.js`, qui n'a
-  besoin que des identifiants pour construire le menu, pas des cotes).
+  `buildMenu()`, items `type: 'radio'`, un par entrée de `MODEL_IDS`
+  (liste dans `main.js`, actuellement `['male', 'female', 'enfant',
+  'adolescent', 'adolescente']`) — cette liste ne vit QUE dans `main.js`,
+  qui n'a besoin que des identifiants pour construire le menu, pas des
+  cotes).
 - **Confirmation avant changement** : `dialog.showMessageBox` (natif,
   côté `main.js`) avant d'envoyer `model-changed` au renderer. Si annulé,
   `buildMenu()` est quand même rappelé pour annuler le cochage radio

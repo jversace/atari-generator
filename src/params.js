@@ -43,6 +43,60 @@ export const referenceModels = {
     foot:  { length: 22, width: 8, thickness: 3.8 },
     joints: { shoulder: 4.2, elbow: 3.0, wrist: 2.2, hip: 5.0, knee: 3.9, ankle: 2.7 },
   },
+  // Approximations stylisées enfant/adolescent(e) : PAS de simple mise à
+  // l'échelle uniforme des adultes. Deux effets bien documentés en dessin
+  // de figure (Loomis et al.), volontairement respectés ici :
+  //  1. la tête grandit beaucoup moins vite que le reste du corps (ratio
+  //     tête/hauteur totale ~15,5% enfant -> ~12% adulte, pas constant) ;
+  //  2. les jambes sont proportionnellement plus COURTES chez l'enfant —
+  //     l'entrejambe n'est PAS à 50% de la hauteur comme chez l'adulte,
+  //     mais nettement en dessous (~43% enfant -> ~47% ado -> 50% adulte),
+  //     et grandissent plus vite que le tronc en approchant l'âge adulte.
+  // Avant la puberté, peu de différenciation fille/garçon (d'où un seul
+  // modèle "enfant") ; l'écart épaules/hanches ne s'accentue qu'à
+  // l'adolescence, encore modérément par rapport aux adultes.
+  enfant: {
+    head:   { width: 12.5, height: 17, depth: 13 },
+    neck:   { height: 5.3, radius: 2.6 },
+    thorax: { topWidth: 19, topDepth: 8, botWidth: 15, botDepth: 7, height: 20.5 },
+    pelvis: { topWidth: 18, topDepth: 10, botWidth: 13.5, botDepth: 7.5, height: 8, wedgeHeight: 6 },
+    spine:  { length: 6, curve1: 0, curve2: 1 },
+    upperArm: { length: 17, radius: 1.6 },
+    forearm:  { length: 14, radius: 1.4 },
+    hand:     { length: 8, width: 3.8, thickness: 1.5 },
+    thigh: { length: 25, radius: 2.7 },
+    shin:  { length: 20, radius: 2.2 },
+    foot:  { length: 15, width: 5.5, thickness: 2.6 },
+    joints: { shoulder: 2.8, elbow: 2.1, wrist: 1.5, hip: 3.2, knee: 2.7, ankle: 1.8 },
+  },
+  adolescent: {
+    head:   { width: 13.7, height: 19, depth: 14 },
+    neck:   { height: 6, radius: 3.1 },
+    thorax: { topWidth: 25, topDepth: 9.5, botWidth: 19.5, botDepth: 8, height: 23.5 },
+    pelvis: { topWidth: 21, topDepth: 12, botWidth: 16, botDepth: 9, height: 9, wedgeHeight: 8 },
+    spine:  { length: 8.5, curve1: 0, curve2: 1.2 },
+    upperArm: { length: 23, radius: 2.0 },
+    forearm:  { length: 19, radius: 1.7 },
+    hand:     { length: 10.5, width: 4.8, thickness: 1.9 },
+    thigh: { length: 33, radius: 3.3 },
+    shin:  { length: 29, radius: 2.6 },
+    foot:  { length: 19, width: 7, thickness: 3.2 },
+    joints: { shoulder: 3.7, elbow: 2.7, wrist: 2.0, hip: 4.2, knee: 3.5, ankle: 2.3 },
+  },
+  adolescente: {
+    head:   { width: 13, height: 18, depth: 13.3 },
+    neck:   { height: 6, radius: 2.7 },
+    thorax: { topWidth: 22, topDepth: 8.5, botWidth: 17, botDepth: 7.2, height: 20.7 },
+    pelvis: { topWidth: 22.5, topDepth: 12.5, botWidth: 17, botDepth: 9.5, height: 9, wedgeHeight: 8.5 },
+    spine:  { length: 7.5, curve1: 0, curve2: 1.2 },
+    upperArm: { length: 20.5, radius: 1.75 },
+    forearm:  { length: 17, radius: 1.5 },
+    hand:     { length: 9.5, width: 4.3, thickness: 1.7 },
+    thigh: { length: 30.5, radius: 2.9 },
+    shin:  { length: 27, radius: 2.3 },
+    foot:  { length: 17.5, width: 6.3, thickness: 2.9 },
+    joints: { shoulder: 3.2, elbow: 2.35, wrist: 1.75, hip: 3.9, knee: 3.05, ankle: 2.05 },
+  },
 };
 
 export function getReferenceDimensions(modelId) {

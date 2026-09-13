@@ -118,7 +118,10 @@
     "dialog.selectModel.title": "Change reference model",
     "dialog.selectModel.message": "Switching the reference model will reset all body dimensions to the new model’s defaults. The current pose will be kept. Continue?",
     "dialog.selectModel.confirm": "Change model",
-    "dialog.selectModel.cancel": "Cancel"
+    "dialog.selectModel.cancel": "Cancel",
+    "menu.options.model.enfant": "Child",
+    "menu.options.model.adolescent": "Teen boy",
+    "menu.options.model.adolescente": "Teen girl"
   },
   "fr": {
     "app.name": "Atari Generator",
@@ -239,6 +242,9 @@
     "dialog.selectModel.title": "Changer de mannequin de référence",
     "dialog.selectModel.message": "Changer de mannequin de référence va réinitialiser toutes les cotes du corps sur les valeurs du nouveau modèle. La posture actuelle sera conservée. Continuer ?",
     "dialog.selectModel.confirm": "Changer de modèle",
-    "dialog.selectModel.cancel": "Annuler"
+    "dialog.selectModel.cancel": "Annuler",
+    "menu.options.model.enfant": "Enfant",
+    "menu.options.model.adolescent": "Adolescent",
+    "menu.options.model.adolescente": "Adolescente"
   }
 }

@@ -43,7 +43,7 @@ config.model = config.model || 'male'; // modèle de référence par défaut
 // Modèles de référence disponibles pour le sous-menu Options > Modèle.
 // Les COTES de chaque modèle vivent côté renderer (src/params.js) — ici
 // on n'a besoin que de la liste des identifiants pour construire le menu.
-const MODEL_IDS = ['male', 'female'];
+const MODEL_IDS = ['male', 'female', 'enfant', 'adolescent', 'adolescente'];
 
 function rememberDir(filePath) {
   config.lastDir = path.dirname(filePath);
