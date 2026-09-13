@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import { buildMannequin, tiltQuaternionFromCurve } from './mannequin.js';
-import { defaultParams, controlSchema, getPath, setPath } from './params.js';
+import { defaultParams, controlSchema, getPath, setPath, getReferenceDimensions, computeFieldRange } from './params.js';
 import { registerTab, triggerSmartLoad, t } from './app-controller.js';
 
 // ------------------------------------------------------------------
@@ -79,9 +79,22 @@ transformControls.addEventListener('dragging-changed', (e) => { orbit.enabled = 
 scene.add(transformControls.getHelper ? transformControls.getHelper() : transformControls);
 
 // ------------------------------------------------------------------
+// Modèle de référence (menu Options > Modèle), persisté côté main.js.
+// Chargé AVANT de construire params/mannequin (voir plus bas) : il
+// détermine les cotes de départ. Défensif comme le reste de l'i18n —
+// main-renderer.js ne doit jamais planter si l'IPC échoue.
+// ------------------------------------------------------------------
+let currentModel = 'male';
+try {
+  currentModel = await window.api.getModel();
+} catch (err) {
+  console.error('Could not read the saved reference model, defaulting to male:', err);
+}
+
+// ------------------------------------------------------------------
 // État de l'application
 // ------------------------------------------------------------------
-let params = defaultParams();
+let params = defaultParams(currentModel);
 let mannequin = buildMannequin(params);
 scene.add(mannequin.root);
 
@@ -98,6 +111,7 @@ setSpineHandlesVisible(false);
 const controlsRoot = document.getElementById('controls');
 
 function buildControlsUI() {
+  const refDims = getReferenceDimensions(currentModel);
   controlsRoot.innerHTML = '';
   for (const group of controlSchema) {
     const title = document.createElement('div');
@@ -115,10 +129,11 @@ function buildControlsUI() {
       label.textContent = t('field.' + field.path) + ' ';
       label.appendChild(valueSpan);
 
+      const [min, max] = computeFieldRange(getPath(refDims, field.path), field);
       const input = document.createElement('input');
       input.type = 'range';
-      input.min = field.min;
-      input.max = field.max;
+      input.min = min;
+      input.max = max;
       input.step = field.step;
       input.value = getPath(params, field.path);
 
@@ -408,18 +423,33 @@ async function doSaveProject() {
 document.getElementById('btnSave').addEventListener('click', doSaveProject);
 
 function loadParams(loaded) {
-  params = { ...defaultParams(), ...loaded, pose: loaded.pose || {} };
+  params = { ...defaultParams(currentModel), ...loaded, pose: loaded.pose || {} };
   buildControlsUI();
   rebuild();
 }
 document.getElementById('btnLoad').addEventListener('click', triggerSmartLoad);
 
 function doReset() {
-  params = defaultParams();
+  params = defaultParams(currentModel);
   buildControlsUI();
   rebuild();
 }
 document.getElementById('btnReset').addEventListener('click', doReset);
+
+// ------------------------------------------------------------------
+// Changement de modèle de référence (menu Options > Modèle) : applique
+// les nouvelles cotes SANS toucher à la posture courante (params.pose),
+// puis reconstruit le panneau (plages de sliders recalculées sur le
+// nouveau modèle) et la scène. La confirmation est déjà gérée côté
+// main.js avant que cette action ne soit envoyée.
+// ------------------------------------------------------------------
+window.api.onModelChanged((modelId) => {
+  currentModel = modelId;
+  const preservedPose = params.pose;
+  params = { ...defaultParams(modelId), pose: preservedPose };
+  buildControlsUI();
+  rebuild();
+});
 
 // ------------------------------------------------------------------
 // Enregistrement auprès du contrôleur d'onglets (app-controller.js) :
